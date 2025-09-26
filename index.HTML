@@ -1,306 +1,73 @@
 import React, { useRef, useEffect, useState } from "react";
 
-/**
- * Oriana Volleyball Profile
- * A React + Canvas volleyball mini-game.
- * Tailwind utility classes used for layout/styling.
- * Drop into a React app (Vite / Create React App).
- */
-
 export default function OrianaVolleyballProfile() {
   const canvasRef = useRef(null);
-  const rafRef = useRef(null);
-
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
-  const [message, setMessage] = useState(
-    "Move your mouse to control Oriana. Click to hit the ball!"
-  );
+  const [msg, setMsg] = useState("Click to hit the ball as Oriana!");
 
-  const teamLeft = ["Allison", "Harper", "Lauren", "Charlotte", "Emily"];
-  const teamRight = ["Parker", "Jazmine", "Chloe", "Bella", "Oriana"];
+  const left = ["Allison", "Harper", "Lauren", "Charlotte", "Emily"];
+  const right = ["Parker", "Jazmine", "Chloe", "Bella", "Oriana"];
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const c = canvasRef.current, ctx = c.getContext("2d");
+    const W = 960, H = 520; c.width = W; c.height = H;
+    const net = { x: W / 2 - 3, w: 6 }, g = 0.35;
 
-    const WIDTH = 960;
-    const HEIGHT = 520;
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
-    canvas.style.width = "100%";
-    canvas.style.height = "520px";
+    const players = [...left.map((n,i)=>({n,x:100+i*80,y:H-100})),
+      ...right.map((n,i)=>({n,x:W/2+100+i*80,y:H-100,isUser:n==="Oriana"}))];
+    const ori = players.find(p=>p.isUser);
 
-    const net = { x: WIDTH / 2 - 4, width: 8, color: "#d1b000" };
-    const gravity = 0.35;
-    let lastTime = performance.now();
+    const ball = {x:W/2,y:120,vx:2,vy:2,r:12};
 
-    // ---- Players ----
-    function makePlayers(names, leftSide) {
-      const players = [];
-      const spacing = (WIDTH / 2 - 60) / (names.length + 1);
-      names.forEach((n, i) => {
-        const x = leftSide
-          ? 60 + spacing * (i + 1)
-          : WIDTH / 2 + 20 + spacing * (i + 1);
-        const y = HEIGHT - 110;
-        players.push({ name: n, x, y, r: 20, isUser: n === "Oriana" });
-      });
-      return players;
-    }
+    let mouseX = ori.x;
+    c.onmousemove = e => mouseX = (e.offsetX/W)*W;
+    c.onclick = ()=>hit(ori);
 
-    const playersLeft = makePlayers(teamLeft, true);
-    const playersRight = makePlayers(teamRight, false);
-    const allPlayers = [...playersLeft, ...playersRight];
-    const ori = allPlayers.find((p) => p.isUser);
-
-    // ---- Ball ----
-    const ball = {
-      x: WIDTH / 2,
-      y: 140,
-      vx: 2 * (Math.random() > 0.5 ? 1 : -1),
-      vy: 1,
-      r: 12,
-      color: "#f7c948",
-    };
-
-    function resetBall() {
-      ball.x = WIDTH / 2;
-      ball.y = 140;
-      ball.vx = 2 * (Math.random() > 0.5 ? 1 : -1);
-      ball.vy = 0;
-    }
-
-    // ---- AI ----
-    function updateBots(dt) {
-      const bots = allPlayers.filter((p) => !p.isUser);
-      bots.forEach((b) => {
-        const targetX = Math.max(
-          60,
-          Math.min(WIDTH - 60, ball.x + (Math.random() * 40 - 20))
-        );
-        const speed = 60 + Math.random() * 50;
-        const dx = targetX - b.x;
-        b.x += Math.sign(dx) * Math.min(Math.abs(dx), speed * dt);
-      });
-    }
-
-    // ---- Controls ----
-    let mouse = { x: ori.x, y: ori.y - 40 };
-    function applyHit(player) {
-      const dx = ball.x - player.x;
-      const dy = ball.y - (player.y - 20);
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 60) {
-        const power = 8 + Math.random() * 4;
-        const nx = dx / (dist || 1);
-        const ny = dy / (dist || 1);
-        const direction = player.x < WIDTH / 2 ? 1 : -1;
-        ball.vx = nx * power + direction * 3;
-        ball.vy = ny * power - 6;
-        setMessage(`${player.name} hits the ball!`);
+    function hit(p){ 
+      if(Math.hypot(ball.x-p.x, ball.y-p.y)<60){
+        ball.vx = (p.x<W/2?1:-1)*4; ball.vy=-6;
+        setMsg(`${p.n} hits!`);
       }
     }
 
-    function onMouseMove(e) {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = (e.clientX - rect.left) * (WIDTH / rect.width);
-      mouse.y = (e.clientY - rect.top) * (HEIGHT / rect.height);
-      ori.x += (mouse.x - ori.x) * 0.12;
-    }
-    function onClick() {
-      applyHit(ori);
-    }
-    canvas.addEventListener("mousemove", onMouseMove);
-    canvas.addEventListener("click", onClick);
-
-    // ---- Update ----
-    function update(dt) {
-      updateBots(dt);
-
-      ball.vy += gravity;
-      ball.x += ball.vx * dt * 60;
-      ball.y += ball.vy * dt * 60;
-
-      // floor collisions
-      if (ball.y + ball.r > HEIGHT - 40) {
-        ball.y = HEIGHT - 40 - ball.r;
-        ball.vy *= -0.6;
-        ball.vx *= 0.98;
-        if (ball.x < WIDTH / 2) {
-          setScoreB((s) => s + 1);
-          setMessage("Point for the right side!");
-        } else {
-          setScoreA((s) => s + 1);
-          setMessage("Point for the left side!");
-        }
-        resetBall();
-      }
-
-      // walls
-      if (ball.x - ball.r < 10) {
-        ball.x = 10 + ball.r;
-        ball.vx *= -0.9;
-      }
-      if (ball.x + ball.r > WIDTH - 10) {
-        ball.x = WIDTH - 10 - ball.r;
-        ball.vx *= -0.9;
-      }
-
+    function loop(){
+      ctx.clearRect(0,0,W,H);
+      // bg
+      let sky = ctx.createLinearGradient(0,0,0,H);
+      sky.addColorStop(0,"#fff9f0"); sky.addColorStop(1,"#ffd97a");
+      ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle="gold"; ctx.beginPath(); ctx.arc(120,80,40,0,7); ctx.fill();
       // net
-      if (
-        ball.x > net.x - 20 &&
-        ball.x < net.x + net.width + 20 &&
-        ball.y + ball.r > HEIGHT - 200
-      ) {
-        ball.vy = -Math.abs(ball.vy) * 0.6 - 2;
-        ball.vx *= -0.7;
-        setMessage("The ball hit the net!");
+      ctx.fillStyle="gold"; ctx.fillRect(net.x,H-200,net.w,80);
+
+      // ball physics
+      ball.vy+=g; ball.x+=ball.vx; ball.y+=ball.vy;
+      if(ball.y+ball.r>H-40){ 
+        ball.y=H-40-ball.r; ball.vy*=-0.6;
+        if(ball.x<W/2) setScoreB(s=>s+1); else setScoreA(s=>s+1);
       }
+      ctx.fillStyle="#f7c948"; ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,7); ctx.fill();
 
-      // bot hits
-      allPlayers.forEach((p) => {
-        const dx = ball.x - p.x;
-        const dy = ball.y - (p.y - 20);
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (!p.isUser && dist < 36 && Math.abs(ball.vx) > 0.5) {
-          const power = 7 + Math.random() * 5;
-          const nx = dx / (dist || 1);
-          const ny = dy / (dist || 1);
-          const direction = p.x < WIDTH / 2 ? 1 : -1;
-          ball.vx = nx * power + direction * 3;
-          ball.vy = ny * power - 6;
-          setMessage(`${p.name} (bot) returns the ball`);
-        }
+      // draw players
+      players.forEach(p=>{
+        if(p.isUser) p.x+=(mouseX-p.x)*0.1;
+        ctx.beginPath(); ctx.arc(p.x,p.y,20,0,7);
+        ctx.fillStyle=p.isUser?"#fffbea":"#fff"; ctx.fill();
+        ctx.fillStyle="#333"; ctx.font="12px sans-serif"; ctx.fillText(p.n,p.x,p.y+34);
       });
+
+      requestAnimationFrame(loop);
     }
-
-    // ---- Draw ----
-    function drawCourt() {
-      // sky
-      const g = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-      g.addColorStop(0, "#fff9f0");
-      g.addColorStop(0.35, "#fff3d6");
-      g.addColorStop(1, "#ffe9b7");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-      // sun
-      ctx.beginPath();
-      ctx.arc(120, 80, 48, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(251,202,60,0.95)";
-      ctx.fill();
-
-      // clouds
-      function cloud(cx, cy, scale) {
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, 28 * scale, 18 * scale, 0, 0, Math.PI * 2);
-        ctx.ellipse(cx + 30 * scale, cy - 6 * scale, 28 * scale, 18 * scale, 0, 0, Math.PI * 2);
-        ctx.ellipse(cx - 26 * scale, cy - 6 * scale, 28 * scale, 18 * scale, 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,255,255,0.95)";
-        ctx.fill();
-      }
-      cloud(240, 70, 1.1);
-      cloud(420, 60, 0.9);
-      cloud(680, 90, 1.2);
-
-      // court
-      ctx.fillStyle = "#ffe6a7";
-      ctx.fillRect(40, HEIGHT - 120, WIDTH - 80, 120);
-
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(60, HEIGHT - 110, WIDTH - 120, 90);
-
-      // net
-      ctx.fillStyle = net.color;
-      ctx.fillRect(net.x, HEIGHT - 200, net.width, 80);
-    }
-
-    function drawPlayers() {
-      allPlayers.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = p.isUser ? "#fffbea" : "#fff";
-        ctx.fill();
-        ctx.strokeStyle = p.isUser ? "#d1b000" : "#e6d5a1";
-        ctx.stroke();
-
-        ctx.fillStyle = "#333";
-        ctx.font = "13px Inter, sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText(p.name, p.x, p.y + 36);
-
-        if (p.isUser) {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y - 28, 22, 0, Math.PI * 2);
-          const radial = ctx.createRadialGradient(
-            p.x - 6,
-            p.y - 34,
-            6,
-            p.x,
-            p.y - 28,
-            28
-          );
-          radial.addColorStop(0, "#fff9f0");
-          radial.addColorStop(0.6, "#fff3d6");
-          radial.addColorStop(1, "#ffd97a");
-          ctx.fillStyle = radial;
-          ctx.fill();
-        }
-      });
-    }
-
-    function drawBall() {
-      const g = ctx.createRadialGradient(
-        ball.x - 4,
-        ball.y - 4,
-        2,
-        ball.x,
-        ball.y,
-        30
-      );
-      g.addColorStop(0, "rgba(255,255,255,0.9)");
-      g.addColorStop(0.25, "rgba(255,245,200,0.95)");
-      g.addColorStop(1, "rgba(247,207,90,0.8)");
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // ---- Game Loop ----
-    function loop(ts) {
-      const dt = (ts - lastTime) / 1000;
-      lastTime = ts;
-      update(dt);
-      drawCourt();
-      drawPlayers();
-      drawBall();
-      rafRef.current = requestAnimationFrame(loop);
-    }
-    rafRef.current = requestAnimationFrame(loop);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      canvas.removeEventListener("mousemove", onMouseMove);
-      canvas.removeEventListener("click", onClick);
-    };
+    loop();
   }, []);
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4">
-      <h1 className="text-3xl font-bold text-yellow-700">🏐 Oriana Volleyball</h1>
-      <p className="text-gray-700">{message}</p>
-      <div className="flex gap-6 font-semibold text-lg">
-        <span>Left: {scoreA}</span>
-        <span>Right: {scoreB}</span>
-      </div>
-      <canvas
-        ref={canvasRef}
-        className="border border-yellow-500 rounded-xl shadow-lg"
-      />
+    <div className="flex flex-col items-center gap-2">
+      <h1 className="text-2xl font-bold text-yellow-700">Oriana Volleyball</h1>
+      <canvas ref={canvasRef} className="border rounded shadow" />
+      <p>{msg}</p>
+      <p className="font-semibold">Left {scoreA} - Right {scoreB}</p>
     </div>
   );
 }
