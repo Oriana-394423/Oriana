@@ -1,210 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Oriana Volleyball Profile — Play</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Oriana Volleyball Game</title>
 <style>
-  :root{
-    --p-purple:#E7D7FF;
-    --p-blue:#D9F2FF;
-    --p-yellow:#FFF1C6;
-    --p-green:#DDF7D9;
-    --pink:#FFE0F0;
-    --accent:#FFD97D;
-    --card: rgba(255,255,255,0.9);
-    --muted:#6b6b6b;
-  }
-  html,body{margin:0;height:100%;font-family:Inter,sans-serif;}
-  canvas{display:block;}
-  #profile{
-    position:absolute;left:20px;top:20px;width:320px;padding:18px;border-radius:14px;background:var(--card);box-shadow:0 8px 30px rgba(15,20,40,0.12);color:#333;z-index:30;
-  }
-  #profile h1{margin:0 0 6px;font-size:20px;color:#522A82;}
-  #profile p, #profile ul, #profile li{margin:3px 0;font-size:14px;color:var(--muted);}
-  footer{position:absolute;right:20px;bottom:20px;font-size:13px;color:#666;}
+  html, body { margin:0; padding:0; overflow:hidden; background: #D9F2FF; }
+  canvas { display:block; }
 </style>
 </head>
 <body>
-<div id="profile">
-<h1>Oriana — Volleyball</h1>
-<p>Move Oriana with your mouse. Click or tap to hit the ball. Play against your bots!</p>
-<ul>
-<li>Practice your serve</li>
-<li>Footwork & positioning</li>
-<li>Communicate with teammates</li>
-<li>Have fun!</li>
-</ul>
-<p>Teammates: Allison, Harper, Lauren, Charlotte, Emily, Parker, Jazmine, Chloe, Bella</p>
-</div>
 <canvas id="game"></canvas>
-<footer>Pastel Volleyball Fun ☁️</footer>
-
 <script>
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 let W = canvas.width = window.innerWidth;
 let H = canvas.height = window.innerHeight;
 
-// Pastel palette
-const PALETTES = {
-  purple:'#E7D7FF', blue:'#D9F2FF', yellow:'#FFF1C6', green:'#DDF7D9', pink:'#FFE0F0', accent:'#FFD97D', court:'#FFF7EA'
-};
-
-// Players
-const leftNames = ['Allison','Harper','Lauren','Charlotte','Emily'];
-const rightNames = ['Parker','Jazmine','Chloe','Bella'];
-const players = [];
-function randomPastel(){ return [PALETTES.purple,PALETTES.blue,PALETTES.yellow,PALETTES.green,PALETTES.pink][Math.floor(Math.random()*5)]; }
-function makePlayer(name,x,y,team,isOriana=false){ return {name,x,y,vx:0,vy:0,team,hue:randomPastel(),isOriana}; }
-
-// Left side bots
-for(let i=0;i<leftNames.length;i++){
-  let x = W*0.25 - 60 + Math.random()*40;
-  let y = 120 + i*((H-240)/leftNames.length);
-  players.push(makePlayer(leftNames[i],x,y,'left'));
-}
-// Right side bots
-for(let i=0;i<rightNames.length;i++){
-  let x = W*0.75 + 60 - Math.random()*40;
-  let y = 120 + i*((H-240)/rightNames.length);
-  players.push(makePlayer(rightNames[i],x,y,'right'));
-}
-// Oriana
-players.push(makePlayer('Oriana', W*0.75 - 40, H - 180,'right',true));
+// Oriana (player) and bots
+const players = [
+  {name:'Oriana', x: W*0.75, y:H-150, isOriana:true, color:'red'},
+  {name:'Bot1', x: W*0.25, y:H/3, isOriana:false, color:'blue'},
+  {name:'Bot2', x: W*0.25, y:H/2, isOriana:false, color:'blue'}
+];
 
 // Ball
-const ball = {x: W/2, y: H/2, r:16, vx: 3*(Math.random()>0.5?1:-1), vy:-4, gravity:0.18};
+const ball = {x: W/2, y:H/2, r:16, vx:4, vy:-4, gravity:0.2};
 
-// Court
-const court = {x:60,y:80,w:W-120,h:H-160};
+// Mouse position
+let mouse = {x: players[0].x, y: players[0].y};
 
-// Mouse
-let mouse = {x: players.find(p=>p.isOriana).x, y: players.find(p=>p.isOriana).y};
-canvas.addEventListener('mousemove',e=>{mouse.x=e.clientX; mouse.y=e.clientY;});
-canvas.addEventListener('touchmove',e=>{mouse.x=e.touches[0].clientX; mouse.y=e.touches[0].clientY;},{passive:false});
-canvas.addEventListener('click',hitBall);
-canvas.addEventListener('touchstart',e=>{ e.preventDefault(); hitBall(e.touches[0]);},{passive:false});
+// Update mouse
+canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+canvas.addEventListener('click', e => hitBall(e));
 
+// Hit ball function
 function hitBall(e){
-  const rect = canvas.getBoundingClientRect();
-  const mx = (e.clientX ?? e.targetTouches?.[0]?.clientX) - rect.left;
-  const my = (e.clientY ?? e.targetTouches?.[0]?.clientY) - rect.top;
-  const dx = ball.x - mx, dy = ball.y - my;
-  const d = Math.hypot(dx,dy);
-  if(d < 90){
-    ball.vx = (dx/d) * (4 + Math.random()*3) * -1;
-    ball.vy = (dy/d) * (4 + Math.random()*3) * -1;
+  const mx = e.clientX;
+  const my = e.clientY;
+  const dx = ball.x - mx;
+  const dy = ball.y - my;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if(dist < 80){ // within hitting range
+    ball.vx = dx * -0.15;
+    ball.vy = dy * -0.15;
   }
 }
 
-// Resize
-window.addEventListener('resize',()=>{W=canvas.width=innerWidth; H=canvas.height=innerHeight; court.w=W-120; court.h=H-160;});
+// Physics update
+function update(){
+  // Move Oriana to mouse
+  players[0].x += (mouse.x - players[0].x)*0.2;
+  players[0].y += (mouse.y - players[0].y)*0.2;
 
-// Draw sun
-function drawSun(){
-  const cx = W-150, cy=140;
-  const g = ctx.createRadialGradient(cx,cy,20,cx,cy,200);
-  g.addColorStop(0,'rgba(255,217,125,1)');
-  g.addColorStop(0.25,'rgba(255,230,150,0.9)');
-  g.addColorStop(0.6,'rgba(255,241,200,0.35)');
-  g.addColorStop(1,'rgba(255,241,200,0)');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx,cy,200,0,Math.PI*2); ctx.fill();
-  const g2 = ctx.createRadialGradient(cx,cy,5,cx,cy,70); g2.addColorStop(0,'#FFF6D3'); g2.addColorStop(1,'#FFD97D');
-  ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(cx,cy,70,0,Math.PI*2); ctx.fill();
-}
+  // Ball physics
+  ball.vy += ball.gravity;
+  ball.x += ball.vx;
+  ball.y += ball.vy;
 
-// Clouds
-function drawCloud(x,y,scale=1,alpha=1){
-  ctx.save(); ctx.translate(x,y); ctx.scale(scale,scale); ctx.globalAlpha=alpha;
-  ctx.shadowColor='rgba(0,0,0,0.08)'; ctx.shadowBlur=18; ctx.fillStyle='#ffffff';
-  [{x:-40,y:0,r:30},{x:-10,y:-10,r:36},{x:30,y:-6,r:28},{x:60,y:4,r:22}].forEach(b=>{ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();});
-  ctx.restore(); ctx.globalAlpha=1; ctx.shadowBlur=0;
-}
+  // Bounce off walls
+  if(ball.x < ball.r){ball.x=ball.r;ball.vx*=-1;}
+  if(ball.x > W-ball.r){ball.x=W-ball.r;ball.vx*=-1;}
+  if(ball.y < ball.r){ball.y=ball.r;ball.vy*=-1;}
+  if(ball.y > H-ball.r){ball.y=H-ball.r;ball.vy*=-0.8; ball.vx*=0.98;}
 
-// Cartoon person
-function drawCartoonPerson(p){
-  const x=p.x, y=p.y; const scale=p.isOriana?1.05:0.95; ctx.save(); ctx.translate(x,y); ctx.scale(scale,scale);
-  // legs
-  ctx.lineWidth=6; ctx.lineCap='round'; ctx.strokeStyle='#6b4f3a';
-  ctx.beginPath(); ctx.moveTo(-8,40); ctx.lineTo(-8,60); ctx.moveTo(8,40); ctx.lineTo(8,60); ctx.stroke();
-  // body
-  ctx.fillStyle=p.hue; ctx.fillRect(-16,-2,32,44);
-  // head
-  ctx.beginPath(); ctx.fillStyle='#FFDDB8'; ctx.arc(0,-18,14,0,Math.PI*2); ctx.fill();
-  // hair
-  ctx.beginPath(); ctx.fillStyle='#6b4f3a'; ctx.ellipse(0,-22,14,10,0,Math.PI,0); ctx.fill();
-  // eyes
-  ctx.fillStyle='#2b2b2b'; ctx.beginPath(); ctx.arc(-5,-20,1.6,0,Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(5,-20,1.6,0,Math.PI*2); ctx.fill();
-  // smile
-  ctx.beginPath(); ctx.arc(0,-14,5,0,Math.PI); ctx.strokeStyle='#6b4f3a'; ctx.lineWidth=1; ctx.stroke();
-  // arms
-  ctx.strokeStyle='#6b4f3a'; ctx.lineWidth=6; ctx.beginPath(); ctx.moveTo(-16,6); ctx.lineTo(-34,18); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(16,6); ctx.lineTo(34,18); ctx.stroke();
-  // name tag
-  ctx.fillStyle='rgba(255,255,255,0.7)'; ctx.fillRect(-22,36,44,14);
-  ctx.fillStyle='#333'; ctx.font='10px Inter, Arial'; ctx.textAlign='center'; ctx.fillText(p.name,0,46);
-  ctx.restore();
-}
-
-// Ball
-function drawBall(){
-  ctx.beginPath(); ctx.fillStyle='#fff'; ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='#ccc'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r-1,Math.PI*6/4,Math.PI*2/4); ctx.stroke();
-  ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r-1,Math.PI/4,Math.PI*5/4); ctx.stroke();
-}
-
-// Court
-function drawCourt(){
-  ctx.fillStyle=PALETTES.court; ctx.fillRect(court.x,court.y,court.w,court.h);
-  ctx.fillStyle='rgba(120,120,120,0.08)'; ctx.fillRect(court.x + court.w/2 - 2, court.y+20,4,court.h-40);
-  ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=2; ctx.strokeRect(court.x,court.y,court.w,court.h);
-}
-
-// Physics + AI
-function updateBall(){
-  ball.vy += ball.gravity; ball.x+=ball.vx; ball.y+=ball.vy;
-  if(ball.x<ball.r){ball.x=ball.r;ball.vx*=-0.85;}
-  if(ball.x>W-ball.r){ball.x=W-ball.r;ball.vx*=-0.85;}
-  if(ball.y<ball.r){ball.y=ball.r;ball.vy*=-0.85;}
-  if(ball.y>H-ball.r){ball.y=H-ball.r;ball.vy*=-0.6;ball.vx*=0.98;if(Math.abs(ball.vy)<0.8)ball.vy=0;}
-}
-function updatePlayers(){
-  players.forEach(p=>{
-    const side = p.team==='left'?court.x + court.w*0.25:court.x + court.w*0.75;
-    const targetY = Math.min(Math.max(court.y+60,ball.y+(p.team==='left'? -40:40)),court.y + court.h -60);
-    p.x += (side - p.x)*0.03+(Math.random()-0.5)*0.6; p.y += (targetY - p.y)*0.02;
-    const dx = ball.x - p.x, dy = ball.y - p.y;
-    if(!p.isOriana && Math.hypot(dx,dy)<70 && ball.y<p.y+20 && Math.random()<0.02){
-      const dir = p.team==='left'?1:-1; ball.vx=(4+Math.random()*3)*dir; ball.vy=-6-Math.random()*3;
-    }
-    if(p.isOriana){p.x += (mouse.x - p.x)*0.22; p.y += (mouse.y - p.y)*0.22;
-      p.x=Math.max(court.x+30,Math.min(court.x+court.w-30,p.x));
-      p.y=Math.max(court.y+40,Math.min(court.y+court.h-30,p.y));
+  // Simple bot AI
+  players.slice(1).forEach(bot=>{
+    let dx = ball.x - bot.x;
+    let dy = ball.y - bot.y;
+    bot.x += dx*0.02;
+    bot.y += dy*0.02;
+    const dist = Math.hypot(ball.x - bot.x, ball.y - bot.y);
+    if(dist < 60 && ball.y < bot.y + 20){
+      ball.vx = (Math.random()*4+2) * (ball.x < W/2 ? 1:-1);
+      ball.vy = -6 - Math.random()*2;
     }
   });
 }
 
-// Clouds
-let cloudPositions=[];
-for(let i=0;i<8;i++){cloudPositions.push({x:Math.random()*W,y:40+Math.random()*140,s:0.9+Math.random()*0.8,vx:0.1+Math.random()*0.25});}
-
-// Animate
-function animate(){
+// Draw everything
+function draw(){
   ctx.clearRect(0,0,W,H);
-  // sky
-  const grad=ctx.createLinearGradient(0,0,0,H); grad.addColorStop(0,PALETTES.blue); grad.addColorStop(0.45,PALETTES.purple); grad.addColorStop(0.85,'#fff'); ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
-  drawSun();
-  cloudPositions.forEach(c=>{drawCloud(c.x,c.y,c.s,1); c.x+=c.vx;if(c.x-160>W)c.x=-200;});
-  drawCourt();
-  players.forEach(p=>{ctx.beginPath(); ctx.ellipse(p.x,p.y+50,28,10,0,0,Math.PI*2); ctx.fillStyle='rgba(0,0,0,0.06)'; ctx.fill();});
-  players.sort((a,b)=>a.y-b.y); players.forEach(p=>drawCartoonPerson(p));
-  drawBall(); updateBall(); updatePlayers();
+  // Draw ball
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r,0,Math.PI*2);
+  ctx.fillStyle='white';
+  ctx.fill();
+  ctx.strokeStyle='black';
+  ctx.stroke();
+
+  // Draw players
+  players.forEach(p=>{
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 20,0,Math.PI*2);
+    ctx.fillStyle=p.color;
+    ctx.fill();
+    ctx.strokeStyle='black';
+    ctx.stroke();
+  });
+}
+
+// Animation loop
+function animate(){
+  update();
+  draw();
   requestAnimationFrame(animate);
 }
 
 animate();
+
+// Resize
+window.addEventListener('resize', ()=>{ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; });
 </script>
 </body>
 </html>
