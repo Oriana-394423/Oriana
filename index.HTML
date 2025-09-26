@@ -1,149 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oriana Volleyball Profile</title>
-  <style>
-    body, html { margin:0; padding:0; overflow:hidden; font-family:sans-serif; }
-    canvas { display:block; }
-    #profile {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(255,255,255,0.8);
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 300px;
-    }
-    h1 { margin:0 0 10px 0; }
-    ul { margin:0; padding-left: 20px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oriana Volleyball Profile</title>
+<style>
+  body, html { margin:0; padding:0; overflow:hidden; font-family:sans-serif; background:#a3d9ff; }
+  canvas { display:block; }
+  #profile {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255,255,255,0.9);
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 300px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+  h1 { margin:0 0 10px 0; color:#f4a261; }
+  ul { margin:0; padding-left: 20px; }
+</style>
 </head>
 <body>
-  <div id="profile">
-    <h1>Oriana</h1>
-    <p>Main player on the team. Tips to get better at volleyball:</p>
-    <ul>
-      <li>Practice your serve</li>
-      <li>Work on your footwork</li>
-      <li>Communicate with teammates</li>
-      <li>Stay positive and have fun!</li>
-    </ul>
-    <p>Teammates: Allison, Harper, Lauren, Charlotte, Emily, Parker, Jazmine, Chloe, Bella</p>
-  </div>
-  <canvas id="game"></canvas>
+<div id="profile">
+  <h1>Oriana</h1>
+  <p>Main player on the team. Tips to get better at volleyball:</p>
+  <ul>
+    <li>Practice your serve</li>
+    <li>Work on your footwork</li>
+    <li>Communicate with teammates</li>
+    <li>Stay positive and have fun!</li>
+  </ul>
+  <p>Teammates: Allison, Harper, Lauren, Charlotte, Emily, Parker, Jazmine, Chloe, Bella</p>
+</div>
+<canvas id="game"></canvas>
 
-  <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    let W = canvas.width = window.innerWidth;
-    let H = canvas.height = window.innerHeight;
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
 
-    const ori = {x: W/4, y: H-100, radius: 20};
-    const ball = {x: W/2, y: H/2, vx: 4, vy: -4, radius: 15};
-    const teammates = [
-      {name:"Allison", x: W/8, y:H/4}, {name:"Harper", x: W/4, y:H/4},
-      {name:"Lauren", x: W/8, y:H/2}, {name:"Charlotte", x: W/4, y:H/2},
-      {name:"Emily", x: 3*W/4, y:H/4}, {name:"Parker", x: 7*W/8, y:H/4},
-      {name:"Jazmine", x: 3*W/4, y:H/2}, {name:"Chloe", x: 7*W/8, y:H/2},
-      {name:"Bella", x: W/2, y:H/4}
-    ];
+// Game objects
+const ori = {x: W/4, y: H-150, radius: 20};
+const ball = {x: W/2, y: H/2, vx: 4, vy: -4, radius: 15};
+const teammates = [
+  {name:"Allison", x: W/8, y:H/4}, {name:"Harper", x: W/4, y:H/4},
+  {name:"Lauren", x: W/8, y:H/2}, {name:"Charlotte", x: W/4, y:H/2},
+  {name:"Emily", x: 3*W/4, y:H/4}, {name:"Parker", x: 7*W/8, y:H/4},
+  {name:"Jazmine", x: 3*W/4, y:H/2}, {name:"Chloe", x: 7*W/8, y:H/2},
+  {name:"Bella", x: W/2, y:H/4}
+];
 
-    // Background clouds and sun
-    function drawBackground() {
-      ctx.fillStyle = 'goldenrod';
-      ctx.fillRect(0,0,W,H);
-      // White clouds
-      for(let i=0;i<8;i++){
-        ctx.beginPath();
-        ctx.arc(150*i%W, 50 + 50*Math.sin(Date.now()/2000+i), 40, 0, Math.PI*2);
-        ctx.fillStyle='white';
-        ctx.fill();
-      }
-      // Sun
-      ctx.beginPath();
-      ctx.arc(W-100,100,80,0,Math.PI*2);
-      ctx.fillStyle='yellow';
-      ctx.fill();
-    }
+// Cute pastel colors
+const bgColor = '#a3d9ff';
+const sunColor = '#FFD97D';
+const cloudColor = '#ffffff';
 
-    // Draw volleyball court
-    function drawCourt() {
-      ctx.fillStyle='saddlebrown';
-      ctx.fillRect(W/2-5,0,10,H);
-      ctx.strokeStyle='white';
-      ctx.strokeRect(50,50,W-100,H-100);
-    }
+// Draw realistic sun
+function drawSun() {
+  const gradient = ctx.createRadialGradient(W-150, 150, 50, W-150, 150, 150);
+  gradient.addColorStop(0, '#FFD97D');
+  gradient.addColorStop(1, 'rgba(255, 217, 125, 0)');
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(W-150, 150, 150, 0, Math.PI*2);
+  ctx.fill();
+}
 
-    // Draw players
-    function drawPlayer(player,color='blue') {
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, 20,0,Math.PI*2);
-      ctx.fillStyle=color;
-      ctx.fill();
-    }
+// Draw fluffy clouds
+function drawCloud(x, y, scale=1){
+  ctx.fillStyle = cloudColor;
+  ctx.beginPath();
+  ctx.arc(x, y, 30*scale, 0, Math.PI*2);
+  ctx.arc(x+25*scale, y+10*scale, 25*scale, 0, Math.PI*2);
+  ctx.arc(x-25*scale, y+10*scale, 25*scale, 0, Math.PI*2);
+  ctx.fill();
+}
 
-    function drawBall() {
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius,0,Math.PI*2);
-      ctx.fillStyle='white';
-      ctx.fill();
-      ctx.strokeStyle='black';
-      ctx.stroke();
-    }
+// Draw volleyball court
+function drawCourt() {
+  ctx.fillStyle='#FAD7A0';
+  ctx.fillRect(W/2-5,0,10,H);
+  ctx.strokeStyle='white';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(50,50,W-100,H-100);
+}
 
-    function updateBall() {
-      ball.x += ball.vx;
-      ball.y += ball.vy;
-      // Bounce off walls
-      if(ball.x<0 || ball.x>W) ball.vx*=-1;
-      if(ball.y<0 || ball.y>H) ball.vy*=-1;
-    }
+// Draw cartoon player
+function drawPlayer(player, color='blue') {
+  // body
+  ctx.fillStyle=color;
+  ctx.fillRect(player.x-10, player.y-20, 20, 30);
+  // head
+  ctx.beginPath();
+  ctx.arc(player.x, player.y-30, 10, 0, Math.PI*2);
+  ctx.fillStyle='#ffe0bd';
+  ctx.fill();
+}
 
-    // Simple bot movement
-    function moveTeammates() {
-      teammates.forEach(t=>{
-        let dx = ball.x - t.x;
-        t.x += dx*0.01;
-        let dy = ball.y - t.y;
-        t.y += dy*0.01;
-      });
-    }
+// Draw ball
+function drawBall() {
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius,0,Math.PI*2);
+  ctx.fillStyle='white';
+  ctx.fill();
+  ctx.strokeStyle='black';
+  ctx.stroke();
+}
 
-    function hitBall(e) {
-      const rect = canvas.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-      const dx = ball.x - mx;
-      const dy = ball.y - my;
-      const dist = Math.sqrt(dx*dx+dy*dy);
-      if(dist < 50) {
-        ball.vx = dx* -0.1;
-        ball.vy = dy* -0.1;
-      }
-    }
+// Update ball movement
+function updateBall() {
+  ball.x += ball.vx;
+  ball.y += ball.vy;
+  if(ball.x<0 || ball.x>W) ball.vx*=-1;
+  if(ball.y<0 || ball.y>H) ball.vy*=-1;
+}
 
-    canvas.addEventListener('mousemove', e=>{ ori.x = e.clientX; ori.y = e.clientY; });
-    canvas.addEventListener('click', hitBall);
+// Move bots
+function moveTeammates() {
+  teammates.forEach(t=>{
+    let dx = ball.x - t.x;
+    t.x += dx*0.01;
+    let dy = ball.y - t.y;
+    t.y += dy*0.01;
+  });
+}
 
-    function animate() {
-      ctx.clearRect(0,0,W,H);
-      drawBackground();
-      drawCourt();
-      drawPlayer(ori,'red'); // Oriana
-      teammates.forEach(p=>drawPlayer(p,'blue'));
-      drawBall();
-      updateBall();
-      moveTeammates();
-      requestAnimationFrame(animate);
-    }
+// Hit ball with mouse
+function hitBall(e) {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const dx = ball.x - mx;
+  const dy = ball.y - my;
+  const dist = Math.sqrt(dx*dx+dy*dy);
+  if(dist < 50) {
+    ball.vx = dx* -0.1;
+    ball.vy = dy* -0.1;
+  }
+}
 
-    animate();
-    window.addEventListener('resize',()=>{
-      W=canvas.width=window.innerWidth;
-      H=canvas.height=window.innerHeight;
-    });
-  </script>
+canvas.addEventListener('mousemove', e=>{ ori.x = e.clientX; ori.y = e.clientY; });
+canvas.addEventListener('click', hitBall);
+
+// Animate everything
+function animate() {
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=bgColor;
+  ctx.fillRect(0,0,W,H);
+
+  drawSun();
+  for(let i=0;i<8;i++){
+    drawCloud(150*i%W, 50 + 50*Math.sin(Date.now()/3000+i), 1 + 0.3*Math.sin(Date.now()/2000+i));
+  }
+
+  drawCourt();
+  drawPlayer(ori,'#FF6B6B'); // Oriana red
+  teammates.forEach(p=>drawPlayer(p,'#4D96FF')); // teammates blue
+  drawBall();
+  updateBall();
+  moveTeammates();
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener('resize',()=>{
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+});
+</script>
 </body>
 </html>
