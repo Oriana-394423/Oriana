@@ -1,175 +1,321 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oriana Volleyball Profile</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Oriana — Volleyball Profile</title>
 <style>
-  body, html { margin:0; padding:0; overflow:hidden; font-family:sans-serif; background:#a3d9ff; }
-  canvas { display:block; }
-  #profile {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: rgba(255,255,255,0.9);
-    padding: 20px;
-    border-radius: 15px;
-    max-width: 300px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  :root{
+    --p-purple:#E7D7FF;
+    --p-blue:#D9F2FF;
+    --p-yellow:#FFF1C6;
+    --p-green:#DDF7D9;
+    --accent:#FFD97D;
+    --card: rgba(255,255,255,0.9);
+    --muted:#6b6b6b;
   }
-  h1 { margin:0 0 10px 0; color:#f4a261; }
-  ul { margin:0; padding-left: 20px; }
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{background:linear-gradient(180deg,var(--p-blue), #fff); overflow:hidden;}
+  #profile{
+    position: absolute; left:20px; top:20px; z-index:30;
+    width:320px; padding:18px; border-radius:14px;
+    background:var(--card); box-shadow:0 8px 30px rgba(15,20,40,0.12);
+    color:#333;
+  }
+  #profile h1{margin:0 0 6px; font-size:20px; color:#522A82;}
+  #profile p{margin:6px 0; color:var(--muted); font-size:14px;}
+  #tips{margin-top:8px; font-size:14px;}
+  #game{display:block; width:100vw; height:100vh;}
+  .legend{font-size:12px; color:var(--muted); margin-top:8px;}
+  .names{font-size:13px; color:#444; margin-top:6px;}
+  footer{position:absolute;right:20px;bottom:20px;background:transparent;color:#666;font-size:13px;}
+  @media (max-width:520px){
+    #profile{width:86%; left:7%; top:12px;}
+  }
 </style>
 </head>
 <body>
-<div id="profile">
-  <h1>Oriana</h1>
-  <p>Main player on the team. Tips to get better at volleyball:</p>
-  <ul>
-    <li>Practice your serve</li>
-    <li>Work on your footwork</li>
-    <li>Communicate with teammates</li>
-    <li>Stay positive and have fun!</li>
-  </ul>
-  <p>Teammates: Allison, Harper, Lauren, Charlotte, Emily, Parker, Jazmine, Chloe, Bella</p>
-</div>
-<canvas id="game"></canvas>
+  <div id="profile">
+    <h1>Oriana — Volleyball</h1>
+    <p>You're Oriana. Use your mouse to move; click (or tap) to hit the ball. Cute pastel aesthetic, realistic sun & clouds, cartoon teammates.</p>
+    <div id="tips">
+      <strong>Tips to get better</strong>
+      <ul>
+        <li>Practice consistency — aim for target zones.</li>
+        <li>Work on footwork and positioning.</li>
+        <li>Call for the ball & communicate.</li>
+        <li>Watch teammates and adapt.</li>
+      </ul>
+    </div>
+    <div class="legend">Teammates (split across the court):</div>
+    <div class="names">Allison, Harper, Lauren, Charlotte, Emily, Parker, Jazmine, Chloe, Bella</div>
+  </div>
+
+  <canvas id="game"></canvas>
+  <footer>Made with pastel clouds ☁️ • Move mouse to play</footer>
 
 <script>
+/* ------- Setup ------- */
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-let W = canvas.width = window.innerWidth;
-let H = canvas.height = window.innerHeight;
+let W = canvas.width = innerWidth;
+let H = canvas.height = innerHeight;
 
-// Game objects
-const ori = {x: W/4, y: H-150, radius: 20};
-const ball = {x: W/2, y: H/2, vx: 4, vy: -4, radius: 15};
-const teammates = [
-  {name:"Allison", x: W/8, y:H/4}, {name:"Harper", x: W/4, y:H/4},
-  {name:"Lauren", x: W/8, y:H/2}, {name:"Charlotte", x: W/4, y:H/2},
-  {name:"Emily", x: 3*W/4, y:H/4}, {name:"Parker", x: 7*W/8, y:H/4},
-  {name:"Jazmine", x: 3*W/4, y:H/2}, {name:"Chloe", x: 7*W/8, y:H/2},
-  {name:"Bella", x: W/2, y:H/4}
-];
+/* Pastel palette */
+const PALETTES = {
+  purple: '#E7D7FF',
+  blue: '#D9F2FF',
+  yellow: '#FFF1C6',
+  green: '#DDF7D9',
+  pink: '#FFE0F0',
+  accent: '#FFD97D',
+  court: '#FFF7EA'
+};
 
-// Cute pastel colors
-const bgColor = '#a3d9ff';
-const sunColor = '#FFD97D';
-const cloudColor = '#ffffff';
+/* Team names & split: left side (opponent side) and right side (Oriana's side incl Oriana) */
+const leftNames  = ['Allison','Harper','Lauren','Charlotte','Emily']; // 5
+const rightNames = ['Parker','Jazmine','Chloe','Bella']; // + Oriana later
 
-// Draw realistic sun
-function drawSun() {
-  const gradient = ctx.createRadialGradient(W-150, 150, 50, W-150, 150, 150);
-  gradient.addColorStop(0, '#FFD97D');
-  gradient.addColorStop(1, 'rgba(255, 217, 125, 0)');
-  ctx.fillStyle = gradient;
+/* Create players (cartoon people) */
+function makePlayer(name,x,y,team='right',isOriana=false){
+  return {
+    name, x, y, vx:0, vy:0, team, hue: randomPastel(), isOriana
+  };
+}
+function randomPastel(){
+  const arr = [PALETTES.purple,PALETTES.blue,PALETTES.yellow,PALETTES.green,PALETTES.pink];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+/* Build players arrays */
+const players = [];
+// left side players (spread vertically)
+for(let i=0;i<leftNames.length;i++){
+  const x = W*0.25 - 80 + (Math.random()*40);
+  const y = 120 + i*( (H-240)/ (leftNames.length) );
+  players.push(makePlayer(leftNames[i], x, y, 'left'));
+}
+// right side players
+for(let i=0;i<rightNames.length;i++){
+  const x = W*0.75 + 80 - (Math.random()*40);
+  const y = 120 + i*( (H-240)/ (rightNames.length) );
+  players.push(makePlayer(rightNames[i], x, y, 'right'));
+}
+// add Oriana to the right
+players.push(makePlayer('Oriana', W*0.75 - 40, H - 180, 'right', true));
+
+/* Ball */
+const ball = { x: W/2, y: H/2, r:16, vx: 3*(Math.random()>0.5?1:-1), vy:-3, gravity:0.18 };
+
+/* Court bounds */
+const court = { x:60, y:80, w:W-120, h: H-160 };
+
+/* Mouse control (Oriana) */
+let mouse = {x: players.find(p=>p.isOriana).x, y: players.find(p=>p.isOriana).y};
+canvas.addEventListener('mousemove',e=>{
+  mouse.x = e.clientX; mouse.y = e.clientY;
+});
+canvas.addEventListener('touchmove', e=>{ const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY; }, {passive:false});
+canvas.addEventListener('click', hitBall);
+canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); hitBall(e.touches[0]); }, {passive:false});
+
+/* Click/tap to hit ball if close */
+function hitBall(e){
+  const rect = canvas.getBoundingClientRect();
+  const mx = (e.clientX ?? e.targetTouches?.[0]?.clientX) - rect.left;
+  const my = (e.clientY ?? e.targetTouches?.[0]?.clientY) - rect.top;
+  const dx = ball.x - mx, dy = ball.y - my;
+  const d = Math.hypot(dx,dy);
+  if(d < 90){
+    // add impulse away from click with some randomness
+    ball.vx = (dx/d) * (4 + Math.random()*3) * -1;
+    ball.vy = (dy/d) * (4 + Math.random()*3) * -1;
+  }
+}
+
+/* Resize handling */
+window.addEventListener('resize', ()=>{
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
+  court.w = W-120; court.h = H-160;
+});
+
+/* ------- Drawing helpers ------- */
+
+/* Draw realistic sun with radial gradient and soft corona */
+function drawSun(){
+  const cx = W - 150, cy = 140;
+  // corona gradient
+  const g = ctx.createRadialGradient(cx,cy,20,cx,cy,200);
+  g.addColorStop(0, 'rgba(255,217,125,1)');
+  g.addColorStop(0.25, 'rgba(255,230,150,0.9)');
+  g.addColorStop(0.6, 'rgba(255,241,200,0.35)');
+  g.addColorStop(1, 'rgba(255,241,200,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath(); ctx.arc(cx,cy,200,0,Math.PI*2); ctx.fill();
+
+  // sun disk with slight texture
+  const g2 = ctx.createRadialGradient(cx,cy,5,cx,cy,70);
+  g2.addColorStop(0,'#FFF6D3');
+  g2.addColorStop(1,'#FFD97D');
+  ctx.fillStyle = g2;
+  ctx.beginPath(); ctx.arc(cx,cy,70,0,Math.PI*2); ctx.fill();
+
+  // soft rays (rotating slowly)
+  const t = Date.now()/1200;
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(Math.sin(t)*0.1);
+  for(let i=0;i<12;i++){
+    ctx.rotate(Math.PI*2/12);
+    ctx.beginPath();
+    ctx.moveTo(60,0);
+    ctx.quadraticCurveTo(110,10,160,6);
+    ctx.quadraticCurveTo(110,-10,60,0);
+    ctx.fillStyle = 'rgba(255,220,120,0.06)';
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* Fluffy, realistic clouds using multiple overlapping circles + shadow */
+function drawCloud(x,y,scale=1,alpha=1){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  ctx.globalAlpha = alpha;
+  ctx.shadowColor = 'rgba(0,0,0,0.08)';
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = '#ffffff';
+  // main blobs
+  const blobs = [{x:-40,y:0,r:30},{x:-10,y:-10,r:36},{x:30,y:-6,r:28},{x:60,y:4,r:22}];
+  blobs.forEach(b=>{
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,b.r,0,Math.PI*2);
+    ctx.fill();
+  });
+  // underside soft gradient for realism
+  const g = ctx.createLinearGradient(-80,10,80,40);
+  g.addColorStop(0,'rgba(255,255,255,0)');
+  g.addColorStop(1,'rgba(240,240,240,0.6)');
+  ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.arc(W-150, 150, 150, 0, Math.PI*2);
-  ctx.fill();
+  ctx.ellipse(10,18,90,22,0,0,Math.PI*2); ctx.fill();
+
+  ctx.restore();
+  ctx.globalAlpha = 1;
+  ctx.shadowBlur = 0;
 }
 
-// Draw fluffy clouds
-function drawCloud(x, y, scale=1){
-  ctx.fillStyle = cloudColor;
+/* Draw a cartoon person with head, hair, shirt, limbs, and name tag */
+function drawCartoonPerson(p){
+  const x = p.x, y = p.y;
+  const scale = (p.isOriana ? 1.05 : 0.95);
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+
+  // legs
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#6b4f3a';
   ctx.beginPath();
-  ctx.arc(x, y, 30*scale, 0, Math.PI*2);
-  ctx.arc(x+25*scale, y+10*scale, 25*scale, 0, Math.PI*2);
-  ctx.arc(x-25*scale, y+10*scale, 25*scale, 0, Math.PI*2);
-  ctx.fill();
-}
+  ctx.moveTo(-8,40); ctx.lineTo(-8,60);
+  ctx.moveTo(8,40);  ctx.lineTo(8,60);
+  ctx.stroke();
 
-// Draw volleyball court
-function drawCourt() {
-  ctx.fillStyle='#FAD7A0';
-  ctx.fillRect(W/2-5,0,10,H);
-  ctx.strokeStyle='white';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(50,50,W-100,H-100);
-}
+  // body (shirt)
+  ctx.beginPath();
+  ctx.fillStyle = p.hue;
+  ctx.roundRect = function(x,y,w,h,r){ this.moveTo(x+r,y); this.arcTo(x+w,y,x+w,y+h,r); this.arcTo(x+w,y+h,x,y+h,r); this.arcTo(x,y+h,x,y,r); this.arcTo(x,y,x+w,y,r); };
+  ctx.fillRect(-16, -2, 32, 44);
+  // simple collar detail
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillRect(-10,6,20,6);
 
-// Draw cartoon player
-function drawPlayer(player, color='blue') {
-  // body
-  ctx.fillStyle=color;
-  ctx.fillRect(player.x-10, player.y-20, 20, 30);
   // head
   ctx.beginPath();
-  ctx.arc(player.x, player.y-30, 10, 0, Math.PI*2);
-  ctx.fillStyle='#ffe0bd';
+  ctx.fillStyle = '#FFDDB8';
+  ctx.arc(0,-18,14,0,Math.PI*2); ctx.fill();
+
+  // hair (simple shape)
+  ctx.beginPath();
+  ctx.fillStyle = '#6b4f3a';
+  ctx.ellipse(0,-22,14,10,0,Math.PI,0);
   ctx.fill();
+
+  // face: eyes and smile
+  ctx.fillStyle='#2b2b2b';
+  ctx.beginPath(); ctx.arc(-5,-20,1.6,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(5,-20,1.6,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(0,-14,5,0,Math.PI); ctx.strokeStyle='#6b4f3a'; ctx.lineWidth=1; ctx.stroke();
+
+  // arms
+  ctx.strokeStyle = '#6b4f3a';
+  ctx.lineWidth=6;
+  ctx.beginPath(); ctx.moveTo(-16,6); ctx.lineTo(-34,18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(16,6); ctx.lineTo(34,18); ctx.stroke();
+
+  // name tag on shirt
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  ctx.fillRect(-22,36,44,14);
+  ctx.fillStyle='#333'; ctx.font='10px Inter, Arial'; ctx.textAlign='center'; ctx.fillText(p.name,0,46);
+
+  ctx.restore();
 }
 
-// Draw ball
-function drawBall() {
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.radius,0,Math.PI*2);
-  ctx.fillStyle='white';
-  ctx.fill();
-  ctx.strokeStyle='black';
+/* Draw volleyball (white with lines) */
+function drawBall(){
+  // main
+  ctx.beginPath(); ctx.fillStyle='#fff'; ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2); ctx.fill();
+  // thin line pattern
+  ctx.strokeStyle = '#d3d3d3'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r-1,Math.PI*6/4,Math.PI*2/4); ctx.stroke();
+  ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r-1,Math.PI/4,Math.PI*5/4); ctx.stroke();
+  ctx.strokeStyle = '#ccc'; ctx.lineWidth=1;
   ctx.stroke();
 }
 
-// Update ball movement
-function updateBall() {
-  ball.x += ball.vx;
-  ball.y += ball.vy;
-  if(ball.x<0 || ball.x>W) ball.vx*=-1;
-  if(ball.y<0 || ball.y>H) ball.vy*=-1;
+/* Draw court with soft pastel sand and net */
+function drawCourt(){
+  // big rounded rectangle floor
+  ctx.fillStyle = PALETTES.court;
+  ctx.fillRect(court.x, court.y, court.w, court.h);
+  // center line / net post
+  ctx.fillStyle = 'rgba(120,120,120,0.08)'; ctx.fillRect(court.x + court.w/2 - 2, court.y+20, 4, court.h-40);
+  // net (thin dashed)
+  ctx.strokeStyle = 'rgba(90,90,90,0.2)'; ctx.lineWidth=3;
+  ctx.setLineDash([8,6]);
+  ctx.beginPath(); ctx.moveTo(court.x, court.y + court.h*0.45); ctx.lineTo(court.x + court.w, court.y + court.h*0.45); ctx.stroke();
+  ctx.setLineDash([]);
+  // boundary lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)';
+  ctx.lineWidth = 2; ctx.strokeRect(court.x, court.y, court.w, court.h);
 }
 
-// Move bots
-function moveTeammates() {
-  teammates.forEach(t=>{
-    let dx = ball.x - t.x;
-    t.x += dx*0.01;
-    let dy = ball.y - t.y;
-    t.y += dy*0.01;
-  });
-}
+/* ------- Simple physics & bot behavior ------- */
+function updateBall(){
+  ball.vy += ball.gravity;
+  ball.x += ball.vx; ball.y += ball.vy;
 
-// Hit ball with mouse
-function hitBall(e) {
-  const rect = canvas.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const dx = ball.x - mx;
-  const dy = ball.y - my;
-  const dist = Math.sqrt(dx*dx+dy*dy);
-  if(dist < 50) {
-    ball.vx = dx* -0.1;
-    ball.vy = dy* -0.1;
-  }
-}
+  // bounce inside viewport
+  if(ball.x < 12){ ball.x = 12; ball.vx *= -0.85; }
+  if(ball.x > W-12){ ball.x = W-12; ball.vx *= -0.85; }
+  if(ball.y < 12){ ball.y = 12; ball.vy *= -0.85; }
 
-canvas.addEventListener('mousemove', e=>{ ori.x = e.clientX; ori.y = e.clientY; });
-canvas.addEventListener('click', hitBall);
-
-// Animate everything
-function animate() {
-  ctx.clearRect(0,0,W,H);
-  ctx.fillStyle=bgColor;
-  ctx.fillRect(0,0,W,H);
-
-  drawSun();
-  for(let i=0;i<8;i++){
-    drawCloud(150*i%W, 50 + 50*Math.sin(Date.now()/3000+i), 1 + 0.3*Math.sin(Date.now()/2000+i));
+  // ground reflection (court surfaces)
+  if(ball.y > H - 10){
+    ball.y = H - 10;
+    ball.vy *= -0.6;
+    ball.vx *= 0.98;
+    // small damping
+    if(Math.abs(ball.vy) < 0.8) ball.vy = 0;
   }
 
-  drawCourt();
-  drawPlayer(ori,'#FF6B6B'); // Oriana red
-  teammates.forEach(p=>drawPlayer(p,'#4D96FF')); // teammates blue
-  drawBall();
-  updateBall();
-  moveTeammates();
-  requestAnimationFrame(animate);
-}
-
-animate();
-
-window.addEventListener('resize',()=>{
-  W=canvas.width=window.innerWidth;
-  H=canvas.height=window.innerHeight;
-});
-</script>
-</body>
-</html>
+  // net collision (simple)
+  const netY = court.y + court.h*0.45;
+  const netX = court.x + court.w/2;
+  if(Math.abs(ball.x - netX) < 28 && ball.y > netY - 30 && ball.y < netY + 30){
+    ball.vx *= -0.9; ball.vy *= 0.9;
+    // nudge to side
+    if(ball.x
