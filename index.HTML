@@ -1,377 +1,169 @@
-
-
 import React, { useRef, useEffect, useState } from "react";
 
-export default function App() {
+// Single-file React component (default export)
+// Tailwind CSS utility classes are used for layout and styling.
+// This file is meant to be placed into a React app (e.g. Vite, Create React App)
+
+export default function OrianaVolleyballProfile() {
   const canvasRef = useRef(null);
   const [running, setRunning] = useState(true);
-  const [score, setScore] = useState({ left: 0, right: 0 });
+  const [scoreA, setScoreA] = useState(0);
+  const [scoreB, setScoreB] = useState(0);
+  const [message, setMessage] = useState("Move mouse to aim. Click to hit the ball as Oriana!");
 
-  // Team split: left side (4), right side (5 including Oriana)
-  const leftTeam = ["Allison", "Lauren", "Charlotte", "Emily"];
-  const rightTeam = ["Parker", "Jazmine", "Chloe", "Bella", "Oriana"];
+  // Team split (5 vs 5). One side includes Oriana.
+  const teamLeft = ["Allison", "Harper", "Lauren", "Charlotte", "Emily"]; // left side
+  const teamRight = ["Parker", "Jazmine", "Chloe", "Bella", "Oriana"]; // right side (Oriana)
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    let width = (canvas.width = Math.min(window.innerWidth - 40, 1000));
-    let height = (canvas.height = 480);
+    canvas.width = 960;
+    canvas.height = 520;
 
-    // court division
-    const court = { w: width, h: height, mid: width / 2 };
+    // Game state
+    const net = { x: canvas.width / 2 - 4, width: 8, color: "#d1b000" };
+    const gravity = 0.35;
+    let lastTime = performance.now();
 
-    // paddles represent players/bots vertically
-    const paddleHeight = 70;
-    const paddleWidth = 12;
-
-    // Player (Oriana) on right side controls with mouse Y
-    const player = { x: court.mid + 140, y: height / 2 - paddleHeight / 2, w: paddleWidth, h: paddleHeight };
-
-    // Bots: represent single combined bot paddle on left (for simplicity) and middle bots
-    const leftBot = { x: 80, y: height / 2 - paddleHeight / 2, w: paddleWidth, h: paddleHeight, nameList: leftTeam };
-    const rightBots = { x: court.mid + 60, y: height / 2 - paddleHeight / 2, w: paddleWidth, h: paddleHeight, nameList: rightTeam.filter(n => n !== "Oriana") };
-
-    // ball
-    const ball = { x: court.mid, y: height / 2, r: 10, vx: 3 * (Math.random() > 0.5 ? 1 : -1), vy: 2 * (Math.random() > 0.5 ? 1 : -1) };
-
-    let mouseY = player.y;
-    let animationId;
-
-    function resetBall(toRight = Math.random() > 0.5) {
-      ball.x = court.mid;
-      ball.y = height / 2;
-      ball.vx = (toRight ? 3 : -3);
-      ball.vy = (Math.random() * 3 - 1.5);
-    }
-
-    function drawBackground() {
-      // sky gradient
-      const g = ctx.createLinearGradient(0, 0, 0, height);
-      g.addColorStop(0, "#fffaf0");
-      g.addColorStop(0.3, "#fff1c6");
-      g.addColorStop(1, "#fde9b7");
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, width, height);
-
-      // golden sun
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255, 204, 51, 0.9)"; // golden glow
-      ctx.arc(110, 80, 48, 0, Math.PI * 2);
-      ctx.fill();
-
-      // soft glow
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255, 223, 100, 0.25)";
-      ctx.arc(110, 80, 120, 0, Math.PI * 2);
-      ctx.fill();
-
-      // clouds (simple)
-      drawCloud(220, 60, 1.0);
-      drawCloud(480, 90, 0.9);
-      drawCloud(760, 55, 0.8);
-    }
-
-    function drawCloud(cx, cy, scale = 1) {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.scale(scale, scale);
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
-      ctx.beginPath();
-      ctx.arc(-20, 10, 22, 0, Math.PI * 2);
-      ctx.arc(10, -5, 28, 0, Math.PI * 2);
-      ctx.arc(40, 8, 20, 0, Math.PI * 2);
-      ctx.arc(10, 18, 18, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawCourt() {
-      // ground/court area
-      ctx.fillStyle = "rgba(255, 248, 230, 0.9)";
-      ctx.fillRect(40, 160, court.w - 80, court.h - 200);
-
-      // net
-      ctx.fillStyle = "#d9d9d9";
-      const netX = court.mid - 2;
-      ctx.fillRect(netX, 160, 4, court.h - 200);
-
-      // court center line
-      ctx.strokeStyle = "rgba(0,0,0,0.06)";
-      ctx.setLineDash([6, 6]);
-      ctx.beginPath();
-      ctx.moveTo(40, height - 40);
-      ctx.lineTo(court.w - 40, height - 40);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // team labels near each side
-      ctx.fillStyle = "#333";
-      ctx.font = "bold 14px Inter, system-ui";
-      ctx.fillText("Left Side", 60, 150);
-      ctx.fillText("Right Side (you: Oriana)", court.mid + 20, 150);
-    }
-
-    function drawPaddle(p) {
-      ctx.fillStyle = "rgba(60,60,60,0.9)";
-      roundRect(ctx, p.x - p.w / 2, p.y, p.w, p.h, 6);
-      ctx.fill();
-    }
-
-    function roundRect(ctx, x, y, w, h, r) {
-      ctx.beginPath();
-      ctx.moveTo(x + r, y);
-      ctx.arcTo(x + w, y, x + w, y + h, r);
-      ctx.arcTo(x + w, y + h, x, y + h, r);
-      ctx.arcTo(x, y + h, x, y, r);
-      ctx.arcTo(x, y, x + w, y, r);
-      ctx.closePath();
-    }
-
-    function drawNames() {
-      // left team names above leftBot
-      ctx.fillStyle = "#222";
-      ctx.font = "12px Inter, system-ui";
-      leftTeam.forEach((n, i) => {
-        ctx.fillText(n, 30, 200 + i * 18);
+    // Players as simple objects
+    function makePlayers(names, leftSide) {
+      const players = [];
+      const spacing = canvas.width / (names.length + 1);
+      names.forEach((n, i) => {
+        const x = leftSide ? (spacing * (i + 1) * 0.9) : (canvas.width / 2 + spacing * (i + 1) * 0.9);
+        const y = leftSide ? canvas.height - 110 : canvas.height - 110;
+        players.push({ name: n, x, y, r: 20, isUser: n === "Oriana" });
       });
-      // right team names
-      rightTeam.forEach((n, i) => {
-        ctx.fillText(n, court.mid + 380, 200 + i * 18);
+      return players;
+    }
+
+    const playersLeft = makePlayers(teamLeft, true);
+    const playersRight = makePlayers(teamRight, false);
+    const allPlayers = [...playersLeft, ...playersRight];
+
+    // Find Oriana object
+    const ori = allPlayers.find(p => p.name === "Oriana");
+
+    // Ball
+    const ball = {
+      x: canvas.width / 2,
+      y: 140,
+      vx: 2 * (Math.random() > 0.5 ? 1 : -1),
+      vy: 1,
+      r: 12,
+      color: "#f7c948",
+    };
+
+    // Simple AI bot targetting: each bot will try to move under the ball
+    function updateBots(dt) {
+      const bots = allPlayers.filter(p => !p.isUser);
+      bots.forEach((b, i) => {
+        // target position horizontally based on ball and side
+        const sideCenter = b.x < canvas.width / 2 ? canvas.width * 0.25 : canvas.width * 0.75;
+        const targetX = Math.max(60, Math.min(canvas.width - 60, ball.x + (Math.random() * 40 - 20)));
+        const speed = 60 + Math.random() * 50; // px per second
+        const dx = targetX - b.x;
+        b.x += Math.sign(dx) * Math.min(Math.abs(dx), speed * dt);
       });
     }
 
-    function drawBall() {
-      // sun-reflection colored volleyball
-      ctx.beginPath();
-      const grd = ctx.createRadialGradient(ball.x - 4, ball.y - 4, 2, ball.x, ball.y, 18);
-      grd.addColorStop(0, "#fff7e6");
-      grd.addColorStop(1, "#ffd86b");
-      ctx.fillStyle = grd;
-      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-      ctx.fill();
+    let mouse = { x: ori.x, y: ori.y - 40, down: false };
 
-      // simple seam
-      ctx.strokeStyle = "rgba(0,0,0,0.08)";
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.r - 1, 0.4, 0.4 + Math.PI);
-      ctx.stroke();
-    }
-
-    function update() {
-      if (!running) return;
-
-      // apply gravity
-      ball.vy += 0.12; // gravity
-      ball.x += ball.vx;
-      ball.y += ball.vy;
-
-      // floor/ceiling bounce
-      if (ball.y + ball.r > height - 40) {
-        ball.y = height - 40 - ball.r;
-        ball.vy *= -0.65;
-        // small friction
-        ball.vx *= 0.995;
-      }
-      if (ball.y - ball.r < 0) {
-        ball.y = ball.r;
-        ball.vy *= -0.9;
-      }
-
-      // left/right out -> point
-      if (ball.x - ball.r < 0) {
-        setScore(s => ({ ...s, right: s.right + 1 }));
-        resetBall(true);
-      }
-      if (ball.x + ball.r > width) {
-        setScore(s => ({ ...s, left: s.left + 1 }));
-        resetBall(false);
-      }
-
-      // bot AI: move left bot toward ball when ball on left half
-      if (ball.x < court.mid) {
-        leftBot.y += (ball.y - (leftBot.y + leftBot.h / 2)) * 0.12;
-      } else {
-        // idle
-        leftBot.y += (height / 2 - leftBot.y) * 0.02;
-      }
-      // right bots move when ball on right half
-      if (ball.x >= court.mid) {
-        rightBots.y += (ball.y - (rightBots.y + rightBots.h / 2)) * 0.12;
-      } else {
-        rightBots.y += (height / 2 - rightBots.y) * 0.02;
-      }
-
-      // player follows mouseY smoothly
-      player.y += (mouseY - player.y - player.h / 2) * 0.2;
-
-      // collisions with paddles
-      // left bot
-      if (ball.x - ball.r < leftBot.x + leftBot.w / 2 + 6) {
-        if (ball.y > leftBot.y && ball.y < leftBot.y + leftBot.h) {
-          // reflect
-          ball.x = leftBot.x + leftBot.w / 2 + ball.r + 6;
-          ball.vx = Math.abs(ball.vx) + 0.8; // push right
-          // small random vertical change
-          ball.vy += (Math.random() - 0.5) * 4;
-        }
-      }
-      // right bots
-      if (ball.x + ball.r > rightBots.x - rightBots.w / 2 - 6) {
-        if (ball.y > rightBots.y && ball.y < rightBots.y + rightBots.h) {
-          ball.x = rightBots.x - rightBots.w / 2 - ball.r - 6;
-          ball.vx = -Math.abs(ball.vx) - 0.8;
-          ball.vy += (Math.random() - 0.5) * 4;
-        }
-      }
-      // player (Oriana)
-      if (ball.x + ball.r > player.x - player.w / 2 - 6) {
-        if (ball.y > player.y && ball.y < player.y + player.h) {
-          ball.x = player.x - player.w / 2 - ball.r - 6;
-          ball.vx = -Math.abs(ball.vx) - 4; // stronger hit by player
-          ball.vy += (mouseY - ball.y) * 0.02; // aim using mouse
-        }
+    function applyHit(player) {
+      // If ball is near player, apply an impulse away from the player toward the other side.
+      const dx = ball.x - player.x;
+      const dy = ball.y - (player.y - 20);
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 60) {
+        const power = 8 + Math.random() * 4;
+        const nx = dx / (dist || 1);
+        const ny = dy / (dist || 1);
+        // send ball roughly over the net depending on side
+        const direction = player.x < canvas.width / 2 ? 1 : -1;
+        ball.vx = nx * power + direction * 3;
+        ball.vy = ny * power - 6; // upward
+        setMessage(`${player.name} hits the ball!`);
       }
     }
 
-    function render() {
-      ctx.clearRect(0, 0, width, height);
-      drawBackground();
-      drawCourt();
-      drawNames();
-      drawPaddle(leftBot);
-      drawPaddle(rightBots);
-      drawPaddle(player);
-      drawBall();
-
-      // scoreboard
-      ctx.fillStyle = "#222";
-      ctx.font = "bold 18px Inter, system-ui";
-      ctx.fillText(`${score.left} - ${score.right}`, court.mid - 22, 40);
-
-      // helper text
-      ctx.font = "12px Inter, system-ui";
-      ctx.fillText("Move your mouse vertically to position Oriana. Hit the ball by moving into it — you're Oriana.", 42, height - 10);
-    }
-
-    function loop() {
-      update();
-      render();
-      animationId = requestAnimationFrame(loop);
-    }
-
-    loop();
-
-    // input
+    // Mouse controls: clicking will make Oriana hit
     function onMouseMove(e) {
       const rect = canvas.getBoundingClientRect();
-      mouseY = e.clientY - rect.top;
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
     }
-
-    function onTouchMove(e) {
-      const rect = canvas.getBoundingClientRect();
-      mouseY = e.touches[0].clientY - rect.top;
+    function onClick(e) {
+      // If Oriana is close enough, hit
+      applyHit(ori);
     }
 
     canvas.addEventListener("mousemove", onMouseMove);
-    canvas.addEventListener("touchmove", onTouchMove);
+    canvas.addEventListener("click", onClick);
 
-    // cleanup
-    return () => {
-      cancelAnimationFrame(animationId);
-      canvas.removeEventListener("mousemove", onMouseMove);
-      canvas.removeEventListener("touchmove", onTouchMove);
-    };
-  }, [running, score.left, score.right]);
+    function resetBall(side) {
+      ball.x = canvas.width / 2;
+      ball.y = 140;
+      ball.vx = 2 * (Math.random() > 0.5 ? 1 : -1);
+      ball.vy = 0;
+    }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white flex flex-col items-center p-6">
-      <header className="w-full max-w-5xl flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          {/* Avatar: white clouds in a golden sky */}
-          <div className="w-24 h-24 rounded-full shadow-2xl overflow-hidden flex items-center justify-center" style={{ background: 'radial-gradient(circle at 20% 20%, #fff9e0, #f7e1a7 40%, #ffd86b 80%)' }}>
-            <svg viewBox="0 0 120 120" className="w-full h-full">
-              <defs>
-                <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="2" />
-                </filter>
-              </defs>
-              <g filter="url(#soft)">
-                <ellipse cx="30" cy="60" rx="18" ry="12" fill="#fff" />
-                <ellipse cx="50" cy="50" rx="24" ry="15" fill="#fff" />
-                <ellipse cx="75" cy="62" rx="18" ry="12" fill="#fff" />
-              </g>
-              <circle cx="20" cy="20" r="10" fill="#ffd86b" opacity="0.95" />
-            </svg>
-          </div>
+    function update(dt) {
+      // dt in seconds
+      updateBots(dt);
 
-          <div>
-            <h1 className="text-2xl font-extrabold">Oriana — Volleyball</h1>
-            <p className="text-sm text-gray-600">Tips, drills, and playful practice. Play as Oriana — hit the ball with your mouse.</p>
-          </div>
-        </div>
+      // physics
+      ball.vy += gravity;
+      ball.x += ball.vx * dt * 60;
+      ball.y += ball.vy * dt * 60;
 
-        <nav className="text-sm">
-          <a className="mr-4 hover:underline" href="#about">About</a>
-          <a className="mr-4 hover:underline" href="#drills">Drills</a>
-          <a className="hover:underline" href="#game">Play</a>
-        </nav>
-      </header>
+      // floor collisions
+      if (ball.y + ball.r > canvas.height - 40) {
+        ball.y = canvas.height - 40 - ball.r;
+        ball.vy *= -0.6;
+        ball.vx *= 0.98;
 
-      <main className="w-full max-w-5xl bg-white/60 rounded-2xl shadow-lg p-6 backdrop-blur-sm">
-        <section id="about" className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">About Oriana & Team</h2>
-          <p className="text-gray-700 mb-3">Oriana is the main player. Her teammates are split across the court — left side vs right side (including Oriana). This page is playful and meant to help practice reaction, positioning, and hitting timing.</p>
+        // determine which side touched floor -> point
+        if (ball.x < canvas.width / 2) {
+          // point to right side
+          setScoreB(s => s + 1);
+          setMessage("Point for the right side!");
+          resetBall('right');
+        } else {
+          setScoreA(s => s + 1);
+          setMessage("Point for the left side!");
+          resetBall('left');
+        }
+      }
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="p-3 rounded-lg bg-white/80">
-              <h3 className="font-medium">Left Side</h3>
-              <ul className="mt-2">
-                {leftTeam.map((n) => (
-                  <li key={n}>{n}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="p-3 rounded-lg bg-white/80">
-              <h3 className="font-medium">Right Side</h3>
-              <ul className="mt-2">
-                {rightTeam.map((n) => (
-                  <li key={n} className={n === "Oriana" ? "font-bold" : ""}>{n}{n === "Oriana" ? " — you" : ""}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
+      // walls
+      if (ball.x - ball.r < 10) {
+        ball.x = 10 + ball.r;
+        ball.vx *= -0.9;
+      }
+      if (ball.x + ball.r > canvas.width - 10) {
+        ball.x = canvas.width - 10 - ball.r;
+        ball.vx *= -0.9;
+      }
 
-        <section id="drills" className="mb-6">
-          <h2 className="text-xl font-semibold mb-2">Quick Drills</h2>
-          <ol className="list-decimal list-inside text-gray-700">
-            <li>Reaction Drill — focus on moving your paddle quickly to intercept the ball.</li>
-            <li>Placement Drill — aim the ball toward gaps near the baseline.</li>
-            <li>Float Serve Practice — try to reduce side spin for unpredictable paths.</li>
-          </ol>
-        </section>
+      // net collision (simple)
+      if (ball.x > net.x - 20 && ball.x < net.x + net.width + 20 && ball.y + ball.r > canvas.height - 120) {
+        // bounce back a bit
+        ball.vy = -Math.abs(ball.vy) * 0.6 - 2;
+        ball.vx *= -0.7;
+        setMessage("The ball hit the net!");
+      }
 
-        <section id="game">
-          <h2 className="text-xl font-semibold mb-2">Play: Control Oriana with your mouse</h2>
-          <div className="bg-white rounded-lg p-4 shadow-inner">
-            <canvas ref={canvasRef} className="w-full rounded-md" style={{ width: '100%' }} />
-          </div>
-        </section>
-      </main>
-
-      <footer className="w-full max-w-5xl mt-6 text-xs text-gray-500">
-        <p>Made for Oriana. Export this to GitHub and publish via GitHub Pages.</p>
-      </footer>
-    </div>
-  );
-}
-
-/*
-README: Quick GitHub Pages deployment (simple)
-1) Initialize a git repo and push to GitHub.
-2) Build the project (if using Vite/CRA): npm run build
-3) Deploy the contents of the build folder to GitHub Pages. You can use the gh-pages package or the repository's Pages settings (deploy from gh-pages branch).
-
-Optional: If you want a single-file HTML (no build), let me know and I can produce an index.html that you can drop into a GitHub repo root and host immediately.
-*/
+      // bots and player hit detection automatic (bots)
+      allPlayers.forEach(p => {
+        // if ball near player and moving toward them, bots may hit
+        const dx = ball.x - p.x;
+        const dy = ball.y - (p.y - 20);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (!p.isUser && dist < 36 && Math.abs(ball.vx) > 0.5) {
+          // bot hit
+          const power = 7 + Math.random() * 5;
+          const nx = dx / (dist || 1);
+          const ny = dy / (dist || 1);
+          const direction = p.x < canvas.width / 2 ? 1 : -1;
+          ball.vx
