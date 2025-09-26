@@ -1,51 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oriana Volleyball Profile</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- React & ReactDOM CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <style>
+    body, html { margin:0; padding:0; overflow:hidden; font-family:sans-serif; }
+    canvas { display:block; }
+    #profile {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.8);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 300px;
+    }
+    h1 { margin:0 0 10px 0; }
+    ul { margin:0; padding-left: 20px; }
+  </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+<body>
+  <div id="profile">
+    <h1>Oriana</h1>
+    <p>Main player on the team. Tips to get better at volleyball:</p>
+    <ul>
+      <li>Practice your serve</li>
+      <li>Work on your footwork</li>
+      <li>Communicate with teammates</li>
+      <li>Stay positive and have fun!</li>
+    </ul>
+    <p>Teammates: Allison, Harper, Lauren, Charlotte, Emily, Parker, Jazmine, Chloe, Bella</p>
+  </div>
+  <canvas id="game"></canvas>
 
-  <div id="root"></div>
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = window.innerWidth;
+    let H = canvas.height = window.innerHeight;
 
-  <script type="text/javascript">
-    const { useRef, useEffect, useState } = React;
+    const ori = {x: W/4, y: H-100, radius: 20};
+    const ball = {x: W/2, y: H/2, vx: 4, vy: -4, radius: 15};
+    const teammates = [
+      {name:"Allison", x: W/8, y:H/4}, {name:"Harper", x: W/4, y:H/4},
+      {name:"Lauren", x: W/8, y:H/2}, {name:"Charlotte", x: W/4, y:H/2},
+      {name:"Emily", x: 3*W/4, y:H/4}, {name:"Parker", x: 7*W/8, y:H/4},
+      {name:"Jazmine", x: 3*W/4, y:H/2}, {name:"Chloe", x: 7*W/8, y:H/2},
+      {name:"Bella", x: W/2, y:H/4}
+    ];
 
-    function OrianaVolleyballProfile() {
-      const canvasRef = useRef(null);
-      const [score, setScore] = useState(0);
-
-      useEffect(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'orange';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = 'white';
-        ctx.font = '20px Arial';
-        ctx.fillText('Oriana Volleyball', 10, 30);
-        ctx.fillText(`Score: ${score}`, 10, 60);
-      }, [score]);
-
-      return (
-        React.createElement('div', { className: 'p-4 bg-white rounded-lg shadow-lg' },
-          React.createElement('canvas', { ref: canvasRef, width: 300, height: 150, className: 'border mb-4' }),
-          React.createElement('button', {
-            className: 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600',
-            onClick: () => setScore(score + 1)
-          }, 'Increase Score')
-        )
-      );
+    // Background clouds and sun
+    function drawBackground() {
+      ctx.fillStyle = 'goldenrod';
+      ctx.fillRect(0,0,W,H);
+      // White clouds
+      for(let i=0;i<8;i++){
+        ctx.beginPath();
+        ctx.arc(150*i%W, 50 + 50*Math.sin(Date.now()/2000+i), 40, 0, Math.PI*2);
+        ctx.fillStyle='white';
+        ctx.fill();
+      }
+      // Sun
+      ctx.beginPath();
+      ctx.arc(W-100,100,80,0,Math.PI*2);
+      ctx.fillStyle='yellow';
+      ctx.fill();
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(OrianaVolleyballProfile));
+    // Draw volleyball court
+    function drawCourt() {
+      ctx.fillStyle='saddlebrown';
+      ctx.fillRect(W/2-5,0,10,H);
+      ctx.strokeStyle='white';
+      ctx.strokeRect(50,50,W-100,H-100);
+    }
+
+    // Draw players
+    function drawPlayer(player,color='blue') {
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, 20,0,Math.PI*2);
+      ctx.fillStyle=color;
+      ctx.fill();
+    }
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius,0,Math.PI*2);
+      ctx.fillStyle='white';
+      ctx.fill();
+      ctx.strokeStyle='black';
+      ctx.stroke();
+    }
+
+    function updateBall() {
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+      // Bounce off walls
+      if(ball.x<0 || ball.x>W) ball.vx*=-1;
+      if(ball.y<0 || ball.y>H) ball.vy*=-1;
+    }
+
+    // Simple bot movement
+    function moveTeammates() {
+      teammates.forEach(t=>{
+        let dx = ball.x - t.x;
+        t.x += dx*0.01;
+        let dy = ball.y - t.y;
+        t.y += dy*0.01;
+      });
+    }
+
+    function hitBall(e) {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      const dx = ball.x - mx;
+      const dy = ball.y - my;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      if(dist < 50) {
+        ball.vx = dx* -0.1;
+        ball.vy = dy* -0.1;
+      }
+    }
+
+    canvas.addEventListener('mousemove', e=>{ ori.x = e.clientX; ori.y = e.clientY; });
+    canvas.addEventListener('click', hitBall);
+
+    function animate() {
+      ctx.clearRect(0,0,W,H);
+      drawBackground();
+      drawCourt();
+      drawPlayer(ori,'red'); // Oriana
+      teammates.forEach(p=>drawPlayer(p,'blue'));
+      drawBall();
+      updateBall();
+      moveTeammates();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+    window.addEventListener('resize',()=>{
+      W=canvas.width=window.innerWidth;
+      H=canvas.height=window.innerHeight;
+    });
   </script>
 </body>
 </html>
