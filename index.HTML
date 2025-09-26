@@ -1,15 +1,21 @@
 import React, { useRef, useEffect, useState } from "react";
 
-// Single-file React component (default export)
-// Tailwind CSS utility classes are used for layout and styling.
-// This file is meant to be placed into a React app (e.g. Vite, Create React App)
+/**
+ * Single-file React component (default export).
+ * Tailwind utility classes are used for layout/styling.
+ * Drop into a React app (Vite / Create React App).
+ */
 
 export default function OrianaVolleyballProfile() {
   const canvasRef = useRef(null);
+  const rafRef = useRef(null);
+
   const [running, setRunning] = useState(true);
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
-  const [message, setMessage] = useState("Move mouse to aim. Click to hit the ball as Oriana!");
+  const [message, setMessage] = useState(
+    "Move mouse to aim. Click to hit the ball as Oriana!"
+  );
 
   // Team split (5 vs 5). One side includes Oriana.
   const teamLeft = ["Allison", "Harper", "Lauren", "Charlotte", "Emily"]; // left side
@@ -17,22 +23,31 @@ export default function OrianaVolleyballProfile() {
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    canvas.width = 960;
-    canvas.height = 520;
+
+    // Fixed canvas internal size for crisp drawing
+    const WIDTH = 960;
+    const HEIGHT = 520;
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    canvas.style.width = "100%";
+    canvas.style.height = "520px";
 
     // Game state
-    const net = { x: canvas.width / 2 - 4, width: 8, color: "#d1b000" };
+    const net = { x: WIDTH / 2 - 4, width: 8, color: "#d1b000" };
     const gravity = 0.35;
     let lastTime = performance.now();
 
-    // Players as simple objects
+    // Players factory
     function makePlayers(names, leftSide) {
       const players = [];
-      const spacing = canvas.width / (names.length + 1);
+      const spacing = (WIDTH / 2 - 60) / (names.length + 1);
       names.forEach((n, i) => {
-        const x = leftSide ? (spacing * (i + 1) * 0.9) : (canvas.width / 2 + spacing * (i + 1) * 0.9);
-        const y = leftSide ? canvas.height - 110 : canvas.height - 110;
+        const x = leftSide
+          ? 60 + spacing * (i + 1)
+          : WIDTH / 2 + 20 + spacing * (i + 1);
+        const y = HEIGHT - 110;
         players.push({ name: n, x, y, r: 20, isUser: n === "Oriana" });
       });
       return players;
@@ -42,12 +57,12 @@ export default function OrianaVolleyballProfile() {
     const playersRight = makePlayers(teamRight, false);
     const allPlayers = [...playersLeft, ...playersRight];
 
-    // Find Oriana object
-    const ori = allPlayers.find(p => p.name === "Oriana");
+    // Oriana reference
+    const ori = allPlayers.find((p) => p.name === "Oriana");
 
     // Ball
     const ball = {
-      x: canvas.width / 2,
+      x: WIDTH / 2,
       y: 140,
       vx: 2 * (Math.random() > 0.5 ? 1 : -1),
       vy: 1,
@@ -55,23 +70,21 @@ export default function OrianaVolleyballProfile() {
       color: "#f7c948",
     };
 
-    // Simple AI bot targetting: each bot will try to move under the ball
+    // Simple AI bot targeting: bots move toward ball's x
     function updateBots(dt) {
-      const bots = allPlayers.filter(p => !p.isUser);
-      bots.forEach((b, i) => {
-        // target position horizontally based on ball and side
-        const sideCenter = b.x < canvas.width / 2 ? canvas.width * 0.25 : canvas.width * 0.75;
-        const targetX = Math.max(60, Math.min(canvas.width - 60, ball.x + (Math.random() * 40 - 20)));
+      const bots = allPlayers.filter((p) => !p.isUser);
+      bots.forEach((b) => {
+        const targetX = Math.max(60, Math.min(WIDTH - 60, ball.x + (Math.random() * 40 - 20)));
         const speed = 60 + Math.random() * 50; // px per second
         const dx = targetX - b.x;
         b.x += Math.sign(dx) * Math.min(Math.abs(dx), speed * dt);
       });
     }
 
-    let mouse = { x: ori.x, y: ori.y - 40, down: false };
+    let mouse = { x: ori.x, y: ori.y - 40 };
 
     function applyHit(player) {
-      // If ball is near player, apply an impulse away from the player toward the other side.
+      // If ball is near player, apply impulse
       const dx = ball.x - player.x;
       const dy = ball.y - (player.y - 20);
       const dist = Math.sqrt(dx * dx + dy * dy);
@@ -79,10 +92,9 @@ export default function OrianaVolleyballProfile() {
         const power = 8 + Math.random() * 4;
         const nx = dx / (dist || 1);
         const ny = dy / (dist || 1);
-        // send ball roughly over the net depending on side
-        const direction = player.x < canvas.width / 2 ? 1 : -1;
+        const direction = player.x < WIDTH / 2 ? 1 : -1;
         ball.vx = nx * power + direction * 3;
-        ball.vy = ny * power - 6; // upward
+        ball.vy = ny * power - 6;
         setMessage(`${player.name} hits the ball!`);
       }
     }
@@ -90,26 +102,26 @@ export default function OrianaVolleyballProfile() {
     // Mouse controls: clicking will make Oriana hit
     function onMouseMove(e) {
       const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
+      mouse.x = (e.clientX - rect.left) * (WIDTH / rect.width);
+      mouse.y = (e.clientY - rect.top) * (HEIGHT / rect.height);
+      // small visual movement of Oriana toward mouse x
+      ori.x += (mouse.x - ori.x) * 0.12;
     }
-    function onClick(e) {
-      // If Oriana is close enough, hit
+    function onClick() {
       applyHit(ori);
     }
 
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("click", onClick);
 
-    function resetBall(side) {
-      ball.x = canvas.width / 2;
+    function resetBall() {
+      ball.x = WIDTH / 2;
       ball.y = 140;
       ball.vx = 2 * (Math.random() > 0.5 ? 1 : -1);
       ball.vy = 0;
     }
 
     function update(dt) {
-      // dt in seconds
       updateBots(dt);
 
       // physics
@@ -117,22 +129,20 @@ export default function OrianaVolleyballProfile() {
       ball.x += ball.vx * dt * 60;
       ball.y += ball.vy * dt * 60;
 
-      // floor collisions
-      if (ball.y + ball.r > canvas.height - 40) {
-        ball.y = canvas.height - 40 - ball.r;
+      // floor collisions -> point
+      if (ball.y + ball.r > HEIGHT - 40) {
+        ball.y = HEIGHT - 40 - ball.r;
         ball.vy *= -0.6;
         ball.vx *= 0.98;
-
-        // determine which side touched floor -> point
-        if (ball.x < canvas.width / 2) {
+        if (ball.x < WIDTH / 2) {
           // point to right side
-          setScoreB(s => s + 1);
+          setScoreB((s) => s + 1);
           setMessage("Point for the right side!");
-          resetBall('right');
+          resetBall();
         } else {
-          setScoreA(s => s + 1);
+          setScoreA((s) => s + 1);
           setMessage("Point for the left side!");
-          resetBall('left');
+          resetBall();
         }
       }
 
@@ -141,29 +151,138 @@ export default function OrianaVolleyballProfile() {
         ball.x = 10 + ball.r;
         ball.vx *= -0.9;
       }
-      if (ball.x + ball.r > canvas.width - 10) {
-        ball.x = canvas.width - 10 - ball.r;
+      if (ball.x + ball.r > WIDTH - 10) {
+        ball.x = WIDTH - 10 - ball.r;
         ball.vx *= -0.9;
       }
 
       // net collision (simple)
-      if (ball.x > net.x - 20 && ball.x < net.x + net.width + 20 && ball.y + ball.r > canvas.height - 120) {
-        // bounce back a bit
+      if (
+        ball.x > net.x - 20 &&
+        ball.x < net.x + net.width + 20 &&
+        ball.y + ball.r > HEIGHT - 200
+      ) {
         ball.vy = -Math.abs(ball.vy) * 0.6 - 2;
         ball.vx *= -0.7;
         setMessage("The ball hit the net!");
       }
 
-      // bots and player hit detection automatic (bots)
-      allPlayers.forEach(p => {
-        // if ball near player and moving toward them, bots may hit
+      // bots and player hit detection (bots)
+      allPlayers.forEach((p) => {
         const dx = ball.x - p.x;
         const dy = ball.y - (p.y - 20);
         const dist = Math.sqrt(dx * dx + dy * dy);
+
         if (!p.isUser && dist < 36 && Math.abs(ball.vx) > 0.5) {
-          // bot hit
           const power = 7 + Math.random() * 5;
           const nx = dx / (dist || 1);
           const ny = dy / (dist || 1);
-          const direction = p.x < canvas.width / 2 ? 1 : -1;
-          ball.vx
+          const direction = p.x < WIDTH / 2 ? 1 : -1;
+          ball.vx = nx * power + direction * 3;
+          ball.vy = ny * power - 6;
+          setMessage(`${p.name} (bot) returns the ball`);
+        }
+      });
+    }
+
+    // Drawing helpers
+    function drawCourt() {
+      // sky gradient
+      const g = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+      g.addColorStop(0, "#fff9f0");
+      g.addColorStop(0.35, "#fff3d6");
+      g.addColorStop(1, "#ffe9b7");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      // sun
+      ctx.beginPath();
+      ctx.arc(120, 80, 48, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(251, 202, 60, 0.95)";
+      ctx.fill();
+
+      // clouds
+      function cloud(cx, cy, scale) {
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, 28 * scale, 18 * scale, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + 30 * scale, cy - 6 * scale, 28 * scale, 18 * scale, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx - 26 * scale, cy - 6 * scale, 28 * scale, 18 * scale, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.95)";
+        ctx.fill();
+      }
+      cloud(240, 70, 1.1);
+      cloud(420, 60, 0.9);
+      cloud(680, 90, 1.2);
+
+      // court floor
+      ctx.fillStyle = "#ffe6a7";
+      ctx.fillRect(40, HEIGHT - 120, WIDTH - 80, 120);
+
+      // court lines
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(60, HEIGHT - 110, WIDTH - 120, 90);
+
+      // net
+      ctx.fillStyle = net.color;
+      ctx.fillRect(net.x, HEIGHT - 200, net.width, 80);
+
+      // center line
+      ctx.beginPath();
+      ctx.moveTo(WIDTH / 2, HEIGHT - 110);
+      ctx.lineTo(WIDTH / 2, HEIGHT - 20);
+      ctx.strokeStyle = "rgba(255,255,255,0.6)";
+      ctx.stroke();
+    }
+
+    function drawPlayers() {
+      allPlayers.forEach((p) => {
+        // shadow
+        ctx.beginPath();
+        ctx.ellipse(p.x + 4, p.y + 18, p.r + 6, p.r / 2 + 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.08)";
+        ctx.fill();
+
+        // body
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.isUser ? "#fffbea" : "#fff";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = p.isUser ? "#d1b000" : "#e6d5a1";
+        ctx.stroke();
+
+        // name
+        ctx.fillStyle = "#333";
+        ctx.font = "13px Inter, system-ui, -apple-system, 'Segoe UI', Roboto";
+        ctx.textAlign = "center";
+        ctx.fillText(p.name, p.x, p.y + 38);
+
+        // highlight Oriana with profile emblem
+        if (p.isUser) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y - 28, 22, 0, Math.PI * 2);
+          const radial = ctx.createRadialGradient(p.x - 6, p.y - 34, 6, p.x, p.y - 28, 28);
+          radial.addColorStop(0, "#fff9f0");
+          radial.addColorStop(0.6, "#fff3d6");
+          radial.addColorStop(1, "#ffd97a");
+          ctx.fillStyle = radial;
+          ctx.fill();
+
+          // small cloud inside
+          ctx.beginPath();
+          ctx.ellipse(p.x - 6, p.y - 32, 6, 4, 0, 0, Math.PI * 2);
+          ctx.ellipse(p.x + 4, p.y - 34, 6, 4, 0, 0, Math.PI * 2);
+          ctx.ellipse(p.x - 12, p.y - 34, 6, 4, 0, 0, Math.PI * 2);
+          ctx.fillStyle = "#ffffff";
+          ctx.fill();
+        }
+      });
+    }
+
+    function drawBall() {
+      // aura
+      const g = ctx.createRadialGradient(ball.x - 4, ball.y - 4, 2, ball.x, ball.y, 30);
+      g.addColorStop(0, "rgba(255,255,255,0.9)");
+      g.addColorStop(0.25, "rgba(255,245,200,0.95)");
+      g.addColorStop(1, "rgba(247,2
