@@ -1,73 +1,51 @@
-import React, { useRef, useEffect, useState } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oriana Volleyball Profile</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
 
-export default function OrianaVolleyballProfile() {
-  const canvasRef = useRef(null);
-  const [scoreA, setScoreA] = useState(0);
-  const [scoreB, setScoreB] = useState(0);
-  const [msg, setMsg] = useState("Click to hit the ball as Oriana!");
+  <div id="root"></div>
 
-  const left = ["Allison", "Harper", "Lauren", "Charlotte", "Emily"];
-  const right = ["Parker", "Jazmine", "Chloe", "Bella", "Oriana"];
+  <script type="text/javascript">
+    const { useRef, useEffect, useState } = React;
 
-  useEffect(() => {
-    const c = canvasRef.current, ctx = c.getContext("2d");
-    const W = 960, H = 520; c.width = W; c.height = H;
-    const net = { x: W / 2 - 3, w: 6 }, g = 0.35;
+    function OrianaVolleyballProfile() {
+      const canvasRef = useRef(null);
+      const [score, setScore] = useState(0);
 
-    const players = [...left.map((n,i)=>({n,x:100+i*80,y:H-100})),
-      ...right.map((n,i)=>({n,x:W/2+100+i*80,y:H-100,isUser:n==="Oriana"}))];
-    const ori = players.find(p=>p.isUser);
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'orange';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const ball = {x:W/2,y:120,vx:2,vy:2,r:12};
+        ctx.fillStyle = 'white';
+        ctx.font = '20px Arial';
+        ctx.fillText('Oriana Volleyball', 10, 30);
+        ctx.fillText(`Score: ${score}`, 10, 60);
+      }, [score]);
 
-    let mouseX = ori.x;
-    c.onmousemove = e => mouseX = (e.offsetX/W)*W;
-    c.onclick = ()=>hit(ori);
-
-    function hit(p){ 
-      if(Math.hypot(ball.x-p.x, ball.y-p.y)<60){
-        ball.vx = (p.x<W/2?1:-1)*4; ball.vy=-6;
-        setMsg(`${p.n} hits!`);
-      }
+      return (
+        React.createElement('div', { className: 'p-4 bg-white rounded-lg shadow-lg' },
+          React.createElement('canvas', { ref: canvasRef, width: 300, height: 150, className: 'border mb-4' }),
+          React.createElement('button', {
+            className: 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600',
+            onClick: () => setScore(score + 1)
+          }, 'Increase Score')
+        )
+      );
     }
 
-    function loop(){
-      ctx.clearRect(0,0,W,H);
-      // bg
-      let sky = ctx.createLinearGradient(0,0,0,H);
-      sky.addColorStop(0,"#fff9f0"); sky.addColorStop(1,"#ffd97a");
-      ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle="gold"; ctx.beginPath(); ctx.arc(120,80,40,0,7); ctx.fill();
-      // net
-      ctx.fillStyle="gold"; ctx.fillRect(net.x,H-200,net.w,80);
-
-      // ball physics
-      ball.vy+=g; ball.x+=ball.vx; ball.y+=ball.vy;
-      if(ball.y+ball.r>H-40){ 
-        ball.y=H-40-ball.r; ball.vy*=-0.6;
-        if(ball.x<W/2) setScoreB(s=>s+1); else setScoreA(s=>s+1);
-      }
-      ctx.fillStyle="#f7c948"; ctx.beginPath(); ctx.arc(ball.x,ball.y,ball.r,0,7); ctx.fill();
-
-      // draw players
-      players.forEach(p=>{
-        if(p.isUser) p.x+=(mouseX-p.x)*0.1;
-        ctx.beginPath(); ctx.arc(p.x,p.y,20,0,7);
-        ctx.fillStyle=p.isUser?"#fffbea":"#fff"; ctx.fill();
-        ctx.fillStyle="#333"; ctx.font="12px sans-serif"; ctx.fillText(p.n,p.x,p.y+34);
-      });
-
-      requestAnimationFrame(loop);
-    }
-    loop();
-  }, []);
-
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <h1 className="text-2xl font-bold text-yellow-700">Oriana Volleyball</h1>
-      <canvas ref={canvasRef} className="border rounded shadow" />
-      <p>{msg}</p>
-      <p className="font-semibold">Left {scoreA} - Right {scoreB}</p>
-    </div>
-  );
-}
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(OrianaVolleyballProfile));
+  </script>
+</body>
+</html>
