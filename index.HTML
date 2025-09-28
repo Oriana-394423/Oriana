@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Oriana Volleyball Game</title>
 <style>
-  html, body { margin:0; padding:0; overflow:hidden; background:#D9F2FF; }
+  html, body { margin:0; padding:0; overflow:hidden; background:#D9F2FF; font-family: "Comic Sans MS", cursive, sans-serif; }
   canvas { display:block; }
 </style>
 </head>
@@ -17,6 +17,205 @@ const ctx = canvas.getContext('2d');
 let W = canvas.width = window.innerWidth;
 let H = canvas.height = window.innerHeight;
 
-// Players
+// Team split (Oriana + 4 teammates vs 5 bots)
 const players = [
-  {name:'Oriana', x: W*0.75, y:H-150*
+  // Oriana's side (right)
+  {name:'Oriana', x: W*0.75, y:H/2+50, isOriana:true, color:'#FF6B6B'},
+  {name:'Charlotte', x: W*0.75, y:H/2-50, isOriana:false, color:'#A78BFA'},
+  {name:'Emily', x: W*0.65, y:H/2-150, isOriana:false, color:'#60A5FA'},
+  {name:'Parker', x: W*0.85, y:H/2-150, isOriana:false, color:'#34D399'},
+  {name:'Jazmine', x: W*0.75, y:H/2-250, isOriana:false, color:'#FBBF24'},
+
+  // Opposite side (left, bots)
+  {name:'Allison', x: W*0.25, y:H/2+50, isOriana:false, color:'#F472B6'},
+  {name:'Harper', x: W*0.25, y:H/2-50, isOriana:false, color:'#38BDF8'},
+  {name:'Lauren', x: W*0.35, y:H/2-150, isOriana:false, color:'#4ADE80'},
+  {name:'Chloe', x: W*0.15, y:H/2-150, isOriana:false, color:'#FACC15'},
+  {name:'Bella', x: W*0.25, y:H/2-250, isOriana:false, color:'#C084FC'}
+];
+
+// Ball
+const ball = {x: W/2, y:H/2, r:16, vx:4, vy:-4, gravity:0.2};
+
+// Mouse
+let mouse = {x: players[0].x, y: players[0].y};
+
+// Score
+let score = {oriana:0, bots:0};
+
+// Events
+canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+canvas.addEventListener('click', e => hitBall(e));
+
+// Hit ball
+function hitBall(e){
+  const mx = e.clientX, my = e.clientY;
+  const dx = ball.x - mx, dy = ball.y - my;
+  const dist = Math.hypot(dx,dy);
+  if(dist < 80){
+    ball.vx = dx * -0.15;
+    ball.vy = dy * -0.15;
+  }
+}
+
+// Update
+function update(){
+  // Oriana follows mouse
+  let o = players[0];
+  o.x += (mouse.x - o.x)*0.2;
+  o.y += (mouse.y - o.y)*0.2;
+
+  // Ball physics
+  ball.vy += ball.gravity;
+  ball.x += ball.vx;
+  ball.y += ball.vy;
+
+  // Bounce walls
+  if(ball.x < ball.r){ ball.x=ball.r; ball.vx*=-1; }
+  if(ball.x > W-ball.r){ ball.x=W-ball.r; ball.vx*=-1; }
+  if(ball.y < ball.r){ ball.y=ball.r; ball.vy*=-1; }
+
+  // Floor detection = point scored
+  if(ball.y > H-ball.r){
+    if(ball.x > W/2){ score.bots++; } else { score.oriana++; }
+    resetBall();
+  }
+
+  // Bots AI (all non-Oriana players)
+  players.filter(p=>!p.isOriana).forEach(bot=>{
+    let dx = ball.x - bot.x;
+    let dy = ball.y - bot.y;
+    bot.x += dx*0.01;  // slower movement
+    bot.y += dy*0.01;
+    const dist = Math.hypot(ball.x - bot.x, ball.y - bot.y);
+    if(dist < 70 && ball.y < bot.y + 20){
+      ball.vx = (Math.random()*4+2) * (ball.x < W/2 ? 1:-1);
+      ball.vy = -6 - Math.random()*2;
+    }
+  });
+}
+
+// Reset ball after point
+function resetBall(){
+  ball.x = W/2;
+  ball.y = H/2;
+  ball.vx = (Math.random()>0.5?4:-4);
+  ball.vy = -4;
+}
+
+// Draw background sky/sun/clouds
+function drawBackground(){
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,"#E0C3FC");
+  grad.addColorStop(1,"#8EC5FC");
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,H);
+
+  // Sun
+  const g = ctx.createRadialGradient(W-150,150,40,W-150,150,150);
+  g.addColorStop(0,"#FFD97D");
+  g.addColorStop(1,"rgba(255,217,125,0)");
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.arc(W-150,150,150,0,Math.PI*2);
+  ctx.fill();
+
+  // Clouds
+  drawCloud(200,100,1.2);
+  drawCloud(500,160,1);
+  drawCloud(800,80,1.5);
+}
+function drawCloud(x,y,scale){
+  ctx.fillStyle="white";
+  ctx.beginPath();
+  ctx.arc(x,y,30*scale,0,Math.PI*2);
+  ctx.arc(x+40*scale,y+10*scale,25*scale,0,Math.PI*2);
+  ctx.arc(x-40*scale,y+10*scale,25*scale,0,Math.PI*2);
+  ctx.fill();
+}
+
+// Court
+function drawCourt(){
+  ctx.fillStyle="#FFF1C6";
+  ctx.fillRect(50, H/2-200, W-100, 400);
+  ctx.strokeStyle="white";
+  ctx.lineWidth=4;
+  ctx.strokeRect(50, H/2-200, W-100, 400);
+  ctx.beginPath();
+  ctx.moveTo(W/2,H/2-200);
+  ctx.lineTo(W/2,H/2+200);
+  ctx.stroke();
+}
+
+// Player (cartoon girl)
+function drawPlayer(p){
+  ctx.save();
+  ctx.translate(p.x,p.y);
+  // Body
+  ctx.fillStyle=p.color;
+  ctx.fillRect(-10,0,20,30);
+  // Head
+  ctx.beginPath();
+  ctx.arc(0,-15,12,0,Math.PI*2);
+  ctx.fillStyle="#FFDDB8";
+  ctx.fill();
+  // Hair (simple pastel ponytail)
+  ctx.fillStyle=p.color;
+  ctx.beginPath();
+  ctx.arc(10,-20,8,0,Math.PI*2);
+  ctx.fill();
+  // Eyes
+  ctx.fillStyle="black";
+  ctx.beginPath();
+  ctx.arc(-4,-15,2,0,Math.PI*2);
+  ctx.arc(4,-15,2,0,Math.PI*2);
+  ctx.fill();
+  // Smile
+  ctx.beginPath();
+  ctx.arc(0,-12,5,0,Math.PI);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Ball
+function drawBall(){
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r,0,Math.PI*2);
+  ctx.fillStyle="white";
+  ctx.fill();
+  ctx.strokeStyle="black";
+  ctx.stroke();
+}
+
+// Scoreboard
+function drawScore(){
+  ctx.fillStyle="rgba(255,255,255,0.7)";
+  ctx.fillRect(W/2-150,20,300,60);
+  ctx.fillStyle="#6B21A8";
+  ctx.font="bold 22px Comic Sans MS";
+  ctx.textAlign="center";
+  ctx.fillText(`Oriana's Team: ${score.oriana}   |   Bots: ${score.bots}`, W/2,60);
+}
+
+// Main draw
+function draw(){
+  drawBackground();
+  drawCourt();
+  players.forEach(p=>drawPlayer(p));
+  drawBall();
+  drawScore();
+}
+
+// Loop
+function animate(){
+  update();
+  draw();
+  requestAnimationFrame(animate);
+}
+animate();
+
+// Resize
+window.addEventListener('resize', ()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight;});
+</script>
+</body>
+</html>
