@@ -3,196 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volleyball Tips | Oriana's Profile</title>
+    <title>Sports Tips | Oriana's Profile</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* Basic Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Quicksand', sans-serif;
-            background: #FFF7FB;
-            color: #333;
-        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Quicksand', sans-serif; background: #FFF7FB; color:#333; overflow-x:hidden; }
 
         header {
             background: linear-gradient(135deg, #E0BBE4, #C3F0F5);
-            padding: 2rem 1rem;
-            text-align: center;
-            border-bottom: 3px solid #FBCDE2;
+            padding: 2rem 1rem; text-align:center; border-bottom:3px solid #FBCDE2; position:relative;
         }
 
-        header h1 {
-            font-size: 2.5rem;
-            color: #6A1B9A;
+        header h1 { font-size:2.5rem; color:#6A1B9A; }
+        header p { font-size:1.2rem; color:#4A148C; margin-top:0.5rem; }
+
+        nav.sports-nav {
+            display:flex; justify-content:center; gap:1rem; margin:1rem 0; flex-wrap:wrap;
         }
 
-        header p {
-            font-size: 1.2rem;
-            color: #4A148C;
-            margin-top: 0.5rem;
+        nav.sports-nav button {
+            background:#FBCDE2; border:none; padding:0.5rem 1rem; border-radius:20px;
+            font-weight:600; cursor:pointer; transition:0.3s; color:#6A1B9A;
         }
 
-        nav {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin: 1rem 0;
+        nav.sports-nav button.active, nav.sports-nav button:hover {
+            background:#FFB6B9; color:#fff;
         }
 
-        nav a {
-            text-decoration: none;
-            color: #6A1B9A;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            transition: 0.3s;
+        main { max-width:900px; margin:2rem auto; padding:0 1rem; }
+
+        section { background:#FFF0F5; margin-bottom:2rem; padding:1.5rem; border-radius:15px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.05); display:none;
         }
 
-        nav a:hover {
-            background: #FBCDE2;
+        section.active { display:block; }
+
+        section h2 { font-size:1.8rem; color:#8E44AD; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
+        section p { line-height:1.6; margin-bottom:1rem; }
+
+        ul { list-style:none; padding-left:0; }
+        ul li { margin-bottom:0.7rem; padding-left:2rem; position:relative; }
+        ul li::before { content:"\f111"; font-family:"Font Awesome 6 Free"; font-weight:900; position:absolute; left:0; color:#F48FB1; }
+
+        footer { text-align:center; padding:1rem; background:#E0BBE4; color:#4A148C; border-top:3px solid #FBCDE2; }
+
+        .icon { color:#FFB6B9; }
+
+        /* Bouncing balls */
+        .ball {
+            position:absolute;
+            width:30px;
+            height:30px;
+            border-radius:50%;
+            background: #FFB6B9;
+            animation: bounce 5s infinite ease-in-out;
         }
 
-        main {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-50px); }
         }
 
-        section {
-            background: #FFF0F5;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-
-        section h2 {
-            font-size: 1.8rem;
-            color: #8E44AD;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        section p {
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        ul {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        ul li {
-            margin-bottom: 0.7rem;
-            padding-left: 2rem;
-            position: relative;
-        }
-
-        ul li::before {
-            content: "\f111";
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            position: absolute;
-            left: 0;
-            color: #F48FB1;
-        }
-
-        footer {
-            text-align: center;
-            padding: 1rem;
-            background: #E0BBE4;
-            color: #4A148C;
-            border-top: 3px solid #FBCDE2;
-        }
-
-        /* Cute volleyball icons styling */
-        .icon {
-            color: #FFB6B9;
-        }
-
-        /* Responsive */
         @media (max-width: 600px) {
-            header h1 {
-                font-size: 2rem;
-            }
-
-            section h2 {
-                font-size: 1.5rem;
-            }
+            header h1 { font-size:2rem; }
+            section h2 { font-size:1.5rem; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1><i class="fas fa-volleyball-ball icon"></i> Oriana's Volleyball Tips</h1>
-        <p>Learn to set, spike, serve, and play like a pro!</p>
-        <nav>
-            <a href="#set">Set</a>
-            <a href="#spike">Spike</a>
-            <a href="#serve">Serve</a>
-            <a href="#tips">Other Tips</a>
-        </nav>
-    </header>
+<header>
+    <h1><i class="fas fa-dumbbell icon"></i> Oriana's Sports Tips</h1>
+    <p>Click a sport to see tips and tricks!</p>
+    <nav class="sports-nav">
+        <button class="active" data-sport="volleyball"><i class="fas fa-volleyball-ball"></i> Volleyball</button>
+        <button data-sport="basketball"><i class="fas fa-basketball-ball"></i> Basketball</button>
+        <button data-sport="soccer"><i class="fas fa-futbol"></i> Soccer</button>
+        <button data-sport="tennis"><i class="fas fa-table-tennis-paddle-ball"></i> Tennis</button>
+    </nav>
 
-    <main>
-        <section id="set">
-            <h2><i class="fas fa-hand-paper icon"></i> How to Set Better</h2>
-            <p>Setting is all about precision and timing. Here are some tips:</p>
-            <ul>
-                <li>Keep your hands above your forehead with thumbs together.</li>
-                <li>Push the ball with your fingers, not your palms.</li>
-                <li>Focus on accuracy rather than power.</li>
-                <li>Always move your feet to get under the ball.</li>
-            </ul>
-        </section>
+    <!-- bouncing volleyballs -->
+    <div class="ball" style="top:20px; left:50px;"></div>
+    <div class="ball" style="top:50px; left:200px; animation-delay:1s;"></div>
+    <div class="ball" style="top:10px; left:350px; animation-delay:2s;"></div>
+</header>
 
-        <section id="spike">
-            <h2><i class="fas fa-bolt icon"></i> How to Spike</h2>
-            <p>Spiking is about power and form. Improve your spike with these steps:</p>
-            <ul>
-                <li>Approach with three steps and jump explosively.</li>
-                <li>Reach high and snap your wrist for power.</li>
-                <li>Target open spaces in the opponent’s court.</li>
-                <li>Practice timing with your setter.</li>
-            </ul>
-        </section>
+<main>
+    <!-- Volleyball -->
+    <section id="volleyball" class="active">
+        <h2><i class="fas fa-volleyball-ball icon"></i> Volleyball Tips</h2>
+        <ul>
+            <li>Keep your hands above your forehead when setting.</li>
+            <li>Jump explosively when spiking.</li>
+            <li>Focus on accuracy in serving.</li>
+            <li>Practice teamwork and communication.</li>
+        </ul>
+    </section>
 
-        <section id="serve">
-            <h2><i class="fas fa-hand-paper-plane icon"></i> How to Serve</h2>
-            <p>A good serve starts the point strong. Tips for serving:</p>
-            <ul>
-                <li>Stand behind the end line and toss the ball in front of you.</li>
-                <li>Keep your eyes on the target and swing through the ball.</li>
-                <li>Experiment with float and topspin serves.</li>
-                <li>Practice consistency and accuracy first, then power.</li>
-            </ul>
-        </section>
+    <!-- Basketball -->
+    <section id="basketball">
+        <h2><i class="fas fa-basketball-ball icon"></i> Basketball Tips</h2>
+        <ul>
+            <li>Work on dribbling with both hands.</li>
+            <li>Focus on shooting form and follow-through.</li>
+            <li>Improve your agility and footwork.</li>
+            <li>Always communicate with teammates on defense.</li>
+        </ul>
+    </section>
 
-        <section id="tips">
-            <h2><i class="fas fa-star icon"></i> Other Volleyball Tips</h2>
-            <ul>
-                <li>Always warm up and stretch before playing.</li>
-                <li>Work on footwork and agility drills.</li>
-                <li>Communicate clearly with teammates.</li>
-                <li>Watch professional games to learn strategies.</li>
-                <li>Stay positive and have fun!</li>
-            </ul>
-        </section>
-    </main>
+    <!-- Soccer -->
+    <section id="soccer">
+        <h2><i class="fas fa-futbol icon"></i> Soccer Tips</h2>
+        <ul>
+            <li>Practice passing with accuracy.</li>
+            <li>Improve your dribbling and ball control.</li>
+            <li>Work on stamina and speed.</li>
+            <li>Communicate with teammates during plays.</li>
+        </ul>
+    </section>
 
-    <footer>
-        &copy; 2025 Oriana's Volleyball Tips | Made with ❤️ and pastel colors
-    </footer>
+    <!-- Tennis -->
+    <section id="tennis">
+        <h2><i class="fas fa-table-tennis-paddle-ball icon"></i> Tennis Tips</h2>
+        <ul>
+            <li>Focus on grip and swing mechanics.</li>
+            <li>Practice serving consistently.</li>
+            <li>Improve footwork to reach every shot.</li>
+            <li>Watch professional matches for strategy.</li>
+        </ul>
+    </section>
+</main>
+
+<footer>
+    &copy; 2025 Oriana's Sports Tips | Made with ❤️ and pastel colors
+</footer>
+
+<script>
+    const buttons = document.querySelectorAll('.sports-nav button');
+    const sections = document.querySelectorAll('main section');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            sections.forEach(sec => sec.classList.remove('active'));
+            document.getElementById(btn.dataset.sport).classList.add('active');
+        });
+    });
+</script>
 
 </body>
 </html>
