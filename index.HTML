@@ -3,41 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Tips | Oriana's Profile</title>
+    <title>Volleyball Tips | Oriana's Profile</title>
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: 'Quicksand', sans-serif; background: #FFF7FB; color:#333; overflow-x:hidden; }
+        body { font-family:'Quicksand', sans-serif; background:#FFF7FB; color:#333; overflow-x:hidden; }
 
         header {
             background: linear-gradient(135deg, #E0BBE4, #C3F0F5);
-            padding: 2rem 1rem; text-align:center; border-bottom:3px solid #FBCDE2; position:relative;
+            padding:2rem 1rem; text-align:center; border-bottom:3px solid #FBCDE2; position:relative;
         }
 
         header h1 { font-size:2.5rem; color:#6A1B9A; }
         header p { font-size:1.2rem; color:#4A148C; margin-top:0.5rem; }
 
-        nav.sports-nav {
-            display:flex; justify-content:center; gap:1rem; margin:1rem 0; flex-wrap:wrap;
-        }
-
-        nav.sports-nav button {
-            background:#FBCDE2; border:none; padding:0.5rem 1rem; border-radius:20px;
-            font-weight:600; cursor:pointer; transition:0.3s; color:#6A1B9A;
-        }
-
-        nav.sports-nav button.active, nav.sports-nav button:hover {
-            background:#FFB6B9; color:#fff;
-        }
-
         main { max-width:900px; margin:2rem auto; padding:0 1rem; }
 
         section { background:#FFF0F5; margin-bottom:2rem; padding:1.5rem; border-radius:15px;
-            box-shadow:0 5px 15px rgba(0,0,0,0.05); display:none;
+            box-shadow:0 5px 15px rgba(0,0,0,0.05);
         }
-
-        section.active { display:block; }
 
         section h2 { font-size:1.8rem; color:#8E44AD; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
         section p { line-height:1.6; margin-bottom:1rem; }
@@ -56,7 +41,7 @@
             width:30px;
             height:30px;
             border-radius:50%;
-            background: #FFB6B9;
+            background:#FFB6B9;
             animation: bounce 5s infinite ease-in-out;
         }
 
@@ -74,85 +59,77 @@
 <body>
 
 <header>
-    <h1><i class="fas fa-dumbbell icon"></i> Oriana's Sports Tips</h1>
-    <p>Click a sport to see tips and tricks!</p>
-    <nav class="sports-nav">
-        <button class="active" data-sport="volleyball"><i class="fas fa-volleyball-ball"></i> Volleyball</button>
-        <button data-sport="basketball"><i class="fas fa-basketball-ball"></i> Basketball</button>
-        <button data-sport="soccer"><i class="fas fa-futbol"></i> Soccer</button>
-        <button data-sport="tennis"><i class="fas fa-table-tennis-paddle-ball"></i> Tennis</button>
-    </nav>
-
-    <!-- bouncing volleyballs -->
+    <h1><i class="fas fa-volleyball-ball icon"></i> Oriana's Volleyball Tips</h1>
+    <p>Improve your skills and become a better volleyball player!</p>
+    <!-- Bouncing volleyballs -->
     <div class="ball" style="top:20px; left:50px;"></div>
     <div class="ball" style="top:50px; left:200px; animation-delay:1s;"></div>
     <div class="ball" style="top:10px; left:350px; animation-delay:2s;"></div>
 </header>
 
 <main>
-    <!-- Volleyball -->
-    <section id="volleyball" class="active">
-        <h2><i class="fas fa-volleyball-ball icon"></i> Volleyball Tips</h2>
+    <section id="set">
+        <h2><i class="fas fa-hand-paper icon"></i> How to Set</h2>
         <ul>
-            <li>Keep your hands above your forehead when setting.</li>
-            <li>Jump explosively when spiking.</li>
-            <li>Focus on accuracy in serving.</li>
-            <li>Practice teamwork and communication.</li>
+            <li>Keep your hands above your forehead with thumbs together.</li>
+            <li>Use your fingertips to push the ball, not your palms.</li>
+            <li>Step under the ball to position yourself correctly.</li>
+            <li>Focus on accuracy rather than power.</li>
+            <li>Practice both forearm and overhead sets.</li>
+            <li>Communicate with your hitters before setting.</li>
         </ul>
     </section>
 
-    <!-- Basketball -->
-    <section id="basketball">
-        <h2><i class="fas fa-basketball-ball icon"></i> Basketball Tips</h2>
+    <section id="spike">
+        <h2><i class="fas fa-bolt icon"></i> How to Spike</h2>
         <ul>
-            <li>Work on dribbling with both hands.</li>
-            <li>Focus on shooting form and follow-through.</li>
-            <li>Improve your agility and footwork.</li>
-            <li>Always communicate with teammates on defense.</li>
+            <li>Approach with three steps and jump explosively.</li>
+            <li>Reach high and snap your wrist for power.</li>
+            <li>Target open spaces in the opponent’s court.</li>
+            <li>Practice timing with your setter.</li>
+            <li>Keep your eyes on the ball at all times.</li>
+            <li>Land safely with knees bent to prevent injury.</li>
         </ul>
     </section>
 
-    <!-- Soccer -->
-    <section id="soccer">
-        <h2><i class="fas fa-futbol icon"></i> Soccer Tips</h2>
+    <section id="serve">
+        <h2><i class="fas fa-hand-paper-plane icon"></i> How to Serve</h2>
         <ul>
-            <li>Practice passing with accuracy.</li>
-            <li>Improve your dribbling and ball control.</li>
-            <li>Work on stamina and speed.</li>
-            <li>Communicate with teammates during plays.</li>
+            <li>Stand behind the end line and toss the ball in front of you.</li>
+            <li>Focus on accuracy first, then power.</li>
+            <li>Experiment with float and topspin serves.</li>
+            <li>Keep your body balanced and swing smoothly.</li>
+            <li>Practice serving to different zones on the court.</li>
         </ul>
     </section>
 
-    <!-- Tennis -->
-    <section id="tennis">
-        <h2><i class="fas fa-table-tennis-paddle-ball icon"></i> Tennis Tips</h2>
+    <section id="pass">
+        <h2><i class="fas fa-hand-holding icon"></i> How to Pass (Bump)</h2>
         <ul>
-            <li>Focus on grip and swing mechanics.</li>
-            <li>Practice serving consistently.</li>
-            <li>Improve footwork to reach every shot.</li>
-            <li>Watch professional matches for strategy.</li>
+            <li>Keep your arms straight and hands together.</li>
+            <li>Angle your platform toward the target.</li>
+            <li>Step toward the ball with your opposite foot.</li>
+            <li>Focus on controlling the ball, not hitting it hard.</li>
+            <li>Communicate with teammates on the court.</li>
         </ul>
     </section>
-</main>
 
-<footer>
-    &copy; 2025 Oriana's Sports Tips | Made with ❤️ and pastel colors
-</footer>
+    <section id="defense">
+        <h2><i class="fas fa-shield-alt icon"></i> Defense Tips</h2>
+        <ul>
+            <li>Always stay low with knees bent.</li>
+            <li>Keep your eyes on the ball at all times.</li>
+            <li>Move quickly to anticipate the hitter.</li>
+            <li>Practice digging both forearm and overhead shots.</li>
+            <li>Communicate and call out plays with teammates.</li>
+        </ul>
+    </section>
 
-<script>
-    const buttons = document.querySelectorAll('.sports-nav button');
-    const sections = document.querySelectorAll('main section');
-
-    buttons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            buttons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            sections.forEach(sec => sec.classList.remove('active'));
-            document.getElementById(btn.dataset.sport).classList.add('active');
-        });
-    });
-</script>
-
-</body>
-</html>
+    <section id="training">
+        <h2><i class="fas fa-running icon"></i> General Training Tips</h2>
+        <ul>
+            <li>Warm up and stretch before every practice.</li>
+            <li>Work on footwork, agility, and reaction speed.</li>
+            <li>Improve your strength with core and leg exercises.</li>
+            <li>Watch professional matches to learn strategies.</li>
+            <li>Stay hydrated and maintain good nutrition.</li>
