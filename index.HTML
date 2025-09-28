@@ -1,207 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Oriana's Volleyball Tips</title>
-  <style>
-    /* General styles */
-    body {
-      font-family: 'Arial', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #fef6ff; /* light pastel background */
-      color: #333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volleyball Tips | Oriana's Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    header {
-      background: linear-gradient(135deg, #cfc2ff, #ffd6d6);
-      padding: 2rem;
-      text-align: center;
-      color: #fff;
-    }
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: #FFF7FB;
+            color: #333;
+        }
 
-    header h1 {
-      margin: 0;
-      font-size: 2.5rem;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-    }
+        header {
+            background: linear-gradient(135deg, #E0BBE4, #C3F0F5);
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 3px solid #FBCDE2;
+        }
 
-    header p {
-      font-size: 1.2rem;
-    }
+        header h1 {
+            font-size: 2.5rem;
+            color: #6A1B9A;
+        }
 
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      background: #d6f0ff;
-      padding: 1rem 0;
-      font-weight: bold;
-    }
+        header p {
+            font-size: 1.2rem;
+            color: #4A148C;
+            margin-top: 0.5rem;
+        }
 
-    nav a {
-      text-decoration: none;
-      color: #5d3fd3;
-      transition: 0.3s;
-    }
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
 
-    nav a:hover {
-      color: #ff7eb9;
-    }
+        nav a {
+            text-decoration: none;
+            color: #6A1B9A;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: 0.3s;
+        }
 
-    section {
-      padding: 3rem 2rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
+        nav a:hover {
+            background: #FBCDE2;
+        }
 
-    section h2 {
-      text-align: center;
-      color: #a279ff;
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
 
-    .tips {
-      display: grid;
-      gap: 2rem;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    }
+        section {
+            background: #FFF0F5;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
 
-    .tip-card {
-      background: #fff6f6;
-      border: 2px solid #ffd6d6;
-      border-radius: 15px;
-      padding: 1.5rem;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
-    }
+        section h2 {
+            font-size: 1.8rem;
+            color: #8E44AD;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
-    .tip-card:hover {
-      transform: translateY(-5px);
-    }
+        section p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
 
-    .tip-card h3 {
-      color: #ff9aea;
-      margin-top: 0;
-    }
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
 
-    footer {
-      text-align: center;
-      padding: 2rem;
-      background: #d6f0ff;
-      color: #5d3fd3;
-      margin-top: 3rem;
-    }
+        ul li {
+            margin-bottom: 0.7rem;
+            padding-left: 2rem;
+            position: relative;
+        }
 
-    /* Cute button style */
-    .btn {
-      display: inline-block;
-      background: #ffdac1;
-      color: #5d3fd3;
-      padding: 0.5rem 1rem;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: 0.3s;
-    }
+        ul li::before {
+            content: "\f111";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: #F48FB1;
+        }
 
-    .btn:hover {
-      background: #ffd6d6;
-    }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background: #E0BBE4;
+            color: #4A148C;
+            border-top: 3px solid #FBCDE2;
+        }
 
-  </style>
+        /* Cute volleyball icons styling */
+        .icon {
+            color: #FFB6B9;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            section h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <h1>Oriana's Volleyball Tips</h1>
-    <p>Learn how to set, spike, serve, and become a better volleyball player!</p>
-  </header>
+    <header>
+        <h1><i class="fas fa-volleyball-ball icon"></i> Oriana's Volleyball Tips</h1>
+        <p>Learn to set, spike, serve, and play like a pro!</p>
+        <nav>
+            <a href="#set">Set</a>
+            <a href="#spike">Spike</a>
+            <a href="#serve">Serve</a>
+            <a href="#tips">Other Tips</a>
+        </nav>
+    </header>
 
-  <nav>
-    <a href="#set">Setting</a>
-    <a href="#spike">Spiking</a>
-    <a href="#serve">Serving</a>
-    <a href="#skills">Skills</a>
-  </nav>
+    <main>
+        <section id="set">
+            <h2><i class="fas fa-hand-paper icon"></i> How to Set Better</h2>
+            <p>Setting is all about precision and timing. Here are some tips:</p>
+            <ul>
+                <li>Keep your hands above your forehead with thumbs together.</li>
+                <li>Push the ball with your fingers, not your palms.</li>
+                <li>Focus on accuracy rather than power.</li>
+                <li>Always move your feet to get under the ball.</li>
+            </ul>
+        </section>
 
-  <section id="set">
-    <h2>Setting Tips</h2>
-    <div class="tips">
-      <div class="tip-card">
-        <h3>Hand Position</h3>
-        <p>Keep your fingers spread, use your fingertips, and form a triangle with your thumbs and index fingers.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Footwork</h3>
-        <p>Move your feet quickly and stay under the ball to maintain control and balance.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Soft Touch</h3>
-        <p>Practice gentle releases to ensure the ball goes exactly where your hitter wants it.</p>
-      </div>
-    </div>
-  </section>
+        <section id="spike">
+            <h2><i class="fas fa-bolt icon"></i> How to Spike</h2>
+            <p>Spiking is about power and form. Improve your spike with these steps:</p>
+            <ul>
+                <li>Approach with three steps and jump explosively.</li>
+                <li>Reach high and snap your wrist for power.</li>
+                <li>Target open spaces in the opponent’s court.</li>
+                <li>Practice timing with your setter.</li>
+            </ul>
+        </section>
 
-  <section id="spike">
-    <h2>Spiking Tips</h2>
-    <div class="tips">
-      <div class="tip-card">
-        <h3>Approach</h3>
-        <p>Use a 3- or 4-step approach and jump explosively to reach maximum height.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Arm Swing</h3>
-        <p>Swing your hitting arm back and forward quickly, snapping your wrist at contact.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Placement</h3>
-        <p>Aim for open spots on the opponent's court rather than always hitting with power.</p>
-      </div>
-    </div>
-  </section>
+        <section id="serve">
+            <h2><i class="fas fa-hand-paper-plane icon"></i> How to Serve</h2>
+            <p>A good serve starts the point strong. Tips for serving:</p>
+            <ul>
+                <li>Stand behind the end line and toss the ball in front of you.</li>
+                <li>Keep your eyes on the target and swing through the ball.</li>
+                <li>Experiment with float and topspin serves.</li>
+                <li>Practice consistency and accuracy first, then power.</li>
+            </ul>
+        </section>
 
-  <section id="serve">
-    <h2>Serving Tips</h2>
-    <div class="tips">
-      <div class="tip-card">
-        <h3>Consistency</h3>
-        <p>Practice overhand and underhand serves regularly to build accuracy and power.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Targeting</h3>
-        <p>Aim for weaker passers on the other team or corners to make your serve more effective.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Follow-Through</h3>
-        <p>Use a smooth follow-through motion to keep your serves accurate and strong.</p>
-      </div>
-    </div>
-  </section>
+        <section id="tips">
+            <h2><i class="fas fa-star icon"></i> Other Volleyball Tips</h2>
+            <ul>
+                <li>Always warm up and stretch before playing.</li>
+                <li>Work on footwork and agility drills.</li>
+                <li>Communicate clearly with teammates.</li>
+                <li>Watch professional games to learn strategies.</li>
+                <li>Stay positive and have fun!</li>
+            </ul>
+        </section>
+    </main>
 
-  <section id="skills">
-    <h2>Essential Volleyball Skills</h2>
-    <div class="tips">
-      <div class="tip-card">
-        <h3>Communication</h3>
-        <p>Always talk to your teammates during the game to avoid collisions and improve teamwork.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Defense</h3>
-        <p>Stay low, anticipate attacks, and practice digging and blocking to protect your court.</p>
-      </div>
-      <div class="tip-card">
-        <h3>Conditioning</h3>
-        <p>Work on endurance, agility, and leg strength to move quickly and jump higher during matches.</p>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <p>Made with 💖 by Oriana | <a class="btn" href="https://github.com/yourusername" target="_blank">GitHub</a></p>
-  </footer>
+    <footer>
+        &copy; 2025 Oriana's Volleyball Tips | Made with ❤️ and pastel colors
+    </footer>
 
 </body>
 </html>
