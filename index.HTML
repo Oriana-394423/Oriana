@@ -1,221 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Oriana Volleyball Game</title>
-<style>
-  html, body { margin:0; padding:0; overflow:hidden; background:#D9F2FF; font-family: "Comic Sans MS", cursive, sans-serif; }
-  canvas { display:block; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oriana's Volleyball Tips</title>
+  <style>
+    /* General styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fef6ff; /* light pastel background */
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #cfc2ff, #ffd6d6);
+      padding: 2rem;
+      text-align: center;
+      color: #fff;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+
+    header p {
+      font-size: 1.2rem;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      background: #d6f0ff;
+      padding: 1rem 0;
+      font-weight: bold;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #5d3fd3;
+      transition: 0.3s;
+    }
+
+    nav a:hover {
+      color: #ff7eb9;
+    }
+
+    section {
+      padding: 3rem 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    section h2 {
+      text-align: center;
+      color: #a279ff;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .tips {
+      display: grid;
+      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .tip-card {
+      background: #fff6f6;
+      border: 2px solid #ffd6d6;
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+
+    .tip-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .tip-card h3 {
+      color: #ff9aea;
+      margin-top: 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background: #d6f0ff;
+      color: #5d3fd3;
+      margin-top: 3rem;
+    }
+
+    /* Cute button style */
+    .btn {
+      display: inline-block;
+      background: #ffdac1;
+      color: #5d3fd3;
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #ffd6d6;
+    }
+
+  </style>
 </head>
 <body>
-<canvas id="game"></canvas>
-<script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-let W = canvas.width = window.innerWidth;
-let H = canvas.height = window.innerHeight;
 
-// Team split (Oriana + 4 teammates vs 5 bots)
-const players = [
-  // Oriana's side (right)
-  {name:'Oriana', x: W*0.75, y:H/2+50, isOriana:true, color:'#FF6B6B'},
-  {name:'Charlotte', x: W*0.75, y:H/2-50, isOriana:false, color:'#A78BFA'},
-  {name:'Emily', x: W*0.65, y:H/2-150, isOriana:false, color:'#60A5FA'},
-  {name:'Parker', x: W*0.85, y:H/2-150, isOriana:false, color:'#34D399'},
-  {name:'Jazmine', x: W*0.75, y:H/2-250, isOriana:false, color:'#FBBF24'},
+  <header>
+    <h1>Oriana's Volleyball Tips</h1>
+    <p>Learn how to set, spike, serve, and become a better volleyball player!</p>
+  </header>
 
-  // Opposite side (left, bots)
-  {name:'Allison', x: W*0.25, y:H/2+50, isOriana:false, color:'#F472B6'},
-  {name:'Harper', x: W*0.25, y:H/2-50, isOriana:false, color:'#38BDF8'},
-  {name:'Lauren', x: W*0.35, y:H/2-150, isOriana:false, color:'#4ADE80'},
-  {name:'Chloe', x: W*0.15, y:H/2-150, isOriana:false, color:'#FACC15'},
-  {name:'Bella', x: W*0.25, y:H/2-250, isOriana:false, color:'#C084FC'}
-];
+  <nav>
+    <a href="#set">Setting</a>
+    <a href="#spike">Spiking</a>
+    <a href="#serve">Serving</a>
+    <a href="#skills">Skills</a>
+  </nav>
 
-// Ball
-const ball = {x: W/2, y:H/2, r:16, vx:4, vy:-4, gravity:0.2};
+  <section id="set">
+    <h2>Setting Tips</h2>
+    <div class="tips">
+      <div class="tip-card">
+        <h3>Hand Position</h3>
+        <p>Keep your fingers spread, use your fingertips, and form a triangle with your thumbs and index fingers.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Footwork</h3>
+        <p>Move your feet quickly and stay under the ball to maintain control and balance.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Soft Touch</h3>
+        <p>Practice gentle releases to ensure the ball goes exactly where your hitter wants it.</p>
+      </div>
+    </div>
+  </section>
 
-// Mouse
-let mouse = {x: players[0].x, y: players[0].y};
+  <section id="spike">
+    <h2>Spiking Tips</h2>
+    <div class="tips">
+      <div class="tip-card">
+        <h3>Approach</h3>
+        <p>Use a 3- or 4-step approach and jump explosively to reach maximum height.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Arm Swing</h3>
+        <p>Swing your hitting arm back and forward quickly, snapping your wrist at contact.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Placement</h3>
+        <p>Aim for open spots on the opponent's court rather than always hitting with power.</p>
+      </div>
+    </div>
+  </section>
 
-// Score
-let score = {oriana:0, bots:0};
+  <section id="serve">
+    <h2>Serving Tips</h2>
+    <div class="tips">
+      <div class="tip-card">
+        <h3>Consistency</h3>
+        <p>Practice overhand and underhand serves regularly to build accuracy and power.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Targeting</h3>
+        <p>Aim for weaker passers on the other team or corners to make your serve more effective.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Follow-Through</h3>
+        <p>Use a smooth follow-through motion to keep your serves accurate and strong.</p>
+      </div>
+    </div>
+  </section>
 
-// Events
-canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-canvas.addEventListener('click', e => hitBall(e));
+  <section id="skills">
+    <h2>Essential Volleyball Skills</h2>
+    <div class="tips">
+      <div class="tip-card">
+        <h3>Communication</h3>
+        <p>Always talk to your teammates during the game to avoid collisions and improve teamwork.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Defense</h3>
+        <p>Stay low, anticipate attacks, and practice digging and blocking to protect your court.</p>
+      </div>
+      <div class="tip-card">
+        <h3>Conditioning</h3>
+        <p>Work on endurance, agility, and leg strength to move quickly and jump higher during matches.</p>
+      </div>
+    </div>
+  </section>
 
-// Hit ball
-function hitBall(e){
-  const mx = e.clientX, my = e.clientY;
-  const dx = ball.x - mx, dy = ball.y - my;
-  const dist = Math.hypot(dx,dy);
-  if(dist < 80){
-    ball.vx = dx * -0.15;
-    ball.vy = dy * -0.15;
-  }
-}
+  <footer>
+    <p>Made with 💖 by Oriana | <a class="btn" href="https://github.com/yourusername" target="_blank">GitHub</a></p>
+  </footer>
 
-// Update
-function update(){
-  // Oriana follows mouse
-  let o = players[0];
-  o.x += (mouse.x - o.x)*0.2;
-  o.y += (mouse.y - o.y)*0.2;
-
-  // Ball physics
-  ball.vy += ball.gravity;
-  ball.x += ball.vx;
-  ball.y += ball.vy;
-
-  // Bounce walls
-  if(ball.x < ball.r){ ball.x=ball.r; ball.vx*=-1; }
-  if(ball.x > W-ball.r){ ball.x=W-ball.r; ball.vx*=-1; }
-  if(ball.y < ball.r){ ball.y=ball.r; ball.vy*=-1; }
-
-  // Floor detection = point scored
-  if(ball.y > H-ball.r){
-    if(ball.x > W/2){ score.bots++; } else { score.oriana++; }
-    resetBall();
-  }
-
-  // Bots AI (all non-Oriana players)
-  players.filter(p=>!p.isOriana).forEach(bot=>{
-    let dx = ball.x - bot.x;
-    let dy = ball.y - bot.y;
-    bot.x += dx*0.01;  // slower movement
-    bot.y += dy*0.01;
-    const dist = Math.hypot(ball.x - bot.x, ball.y - bot.y);
-    if(dist < 70 && ball.y < bot.y + 20){
-      ball.vx = (Math.random()*4+2) * (ball.x < W/2 ? 1:-1);
-      ball.vy = -6 - Math.random()*2;
-    }
-  });
-}
-
-// Reset ball after point
-function resetBall(){
-  ball.x = W/2;
-  ball.y = H/2;
-  ball.vx = (Math.random()>0.5?4:-4);
-  ball.vy = -4;
-}
-
-// Draw background sky/sun/clouds
-function drawBackground(){
-  const grad = ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,"#E0C3FC");
-  grad.addColorStop(1,"#8EC5FC");
-  ctx.fillStyle=grad;
-  ctx.fillRect(0,0,W,H);
-
-  // Sun
-  const g = ctx.createRadialGradient(W-150,150,40,W-150,150,150);
-  g.addColorStop(0,"#FFD97D");
-  g.addColorStop(1,"rgba(255,217,125,0)");
-  ctx.fillStyle=g;
-  ctx.beginPath();
-  ctx.arc(W-150,150,150,0,Math.PI*2);
-  ctx.fill();
-
-  // Clouds
-  drawCloud(200,100,1.2);
-  drawCloud(500,160,1);
-  drawCloud(800,80,1.5);
-}
-function drawCloud(x,y,scale){
-  ctx.fillStyle="white";
-  ctx.beginPath();
-  ctx.arc(x,y,30*scale,0,Math.PI*2);
-  ctx.arc(x+40*scale,y+10*scale,25*scale,0,Math.PI*2);
-  ctx.arc(x-40*scale,y+10*scale,25*scale,0,Math.PI*2);
-  ctx.fill();
-}
-
-// Court
-function drawCourt(){
-  ctx.fillStyle="#FFF1C6";
-  ctx.fillRect(50, H/2-200, W-100, 400);
-  ctx.strokeStyle="white";
-  ctx.lineWidth=4;
-  ctx.strokeRect(50, H/2-200, W-100, 400);
-  ctx.beginPath();
-  ctx.moveTo(W/2,H/2-200);
-  ctx.lineTo(W/2,H/2+200);
-  ctx.stroke();
-}
-
-// Player (cartoon girl)
-function drawPlayer(p){
-  ctx.save();
-  ctx.translate(p.x,p.y);
-  // Body
-  ctx.fillStyle=p.color;
-  ctx.fillRect(-10,0,20,30);
-  // Head
-  ctx.beginPath();
-  ctx.arc(0,-15,12,0,Math.PI*2);
-  ctx.fillStyle="#FFDDB8";
-  ctx.fill();
-  // Hair (simple pastel ponytail)
-  ctx.fillStyle=p.color;
-  ctx.beginPath();
-  ctx.arc(10,-20,8,0,Math.PI*2);
-  ctx.fill();
-  // Eyes
-  ctx.fillStyle="black";
-  ctx.beginPath();
-  ctx.arc(-4,-15,2,0,Math.PI*2);
-  ctx.arc(4,-15,2,0,Math.PI*2);
-  ctx.fill();
-  // Smile
-  ctx.beginPath();
-  ctx.arc(0,-12,5,0,Math.PI);
-  ctx.stroke();
-  ctx.restore();
-}
-
-// Ball
-function drawBall(){
-  ctx.beginPath();
-  ctx.arc(ball.x, ball.y, ball.r,0,Math.PI*2);
-  ctx.fillStyle="white";
-  ctx.fill();
-  ctx.strokeStyle="black";
-  ctx.stroke();
-}
-
-// Scoreboard
-function drawScore(){
-  ctx.fillStyle="rgba(255,255,255,0.7)";
-  ctx.fillRect(W/2-150,20,300,60);
-  ctx.fillStyle="#6B21A8";
-  ctx.font="bold 22px Comic Sans MS";
-  ctx.textAlign="center";
-  ctx.fillText(`Oriana's Team: ${score.oriana}   |   Bots: ${score.bots}`, W/2,60);
-}
-
-// Main draw
-function draw(){
-  drawBackground();
-  drawCourt();
-  players.forEach(p=>drawPlayer(p));
-  drawBall();
-  drawScore();
-}
-
-// Loop
-function animate(){
-  update();
-  draw();
-  requestAnimationFrame(animate);
-}
-animate();
-
-// Resize
-window.addEventListener('resize', ()=>{W=canvas.width=innerWidth;H=canvas.height=innerHeight;});
-</script>
 </body>
 </html>
